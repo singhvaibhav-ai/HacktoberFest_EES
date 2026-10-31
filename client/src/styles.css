@@ -198,3 +198,8 @@ select {
   white-space: pre-wrap;
   font-size: 13px;
 }
+
+tr.leaderboard-me {
+background: var(--me-row, rgba(255, 213, 79, 0.18));
+font-weight: 600;
+}
