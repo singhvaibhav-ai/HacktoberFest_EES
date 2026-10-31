@@ -17,12 +17,14 @@ export default function ProblemPage() {
   const [code, setCode] = useState(LANGUAGES[0].template);
   const [status, setStatus] = useState('');
   const [result, setResult] = useState(null);
+  const [selectedTestIndex, setSelectedTestIndex] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     setProblem(null);
     setResult(null);
+    setSelectedTestIndex(null);
     setCode(language.template);
     api.problem(slug).then(setProblem);
   }, [slug]);
@@ -44,9 +46,14 @@ export default function ProblemPage() {
     }
     setBusy(true);
     setResult(null);
+    setSelectedTestIndex(null);
     try {
       const res = await judge(code, problem, setStatus);
       setResult(res);
+      if (res.tests && res.tests.length > 0) {
+        const firstFail = res.tests.findIndex((t) => !t.passed);
+        setSelectedTestIndex(firstFail !== -1 ? firstFail : null);
+      }
       await api.submit({ username: user.username, slug, language: language.id, code, ...res });
       loadSubmissions();
     } catch (err) {
@@ -58,6 +65,8 @@ export default function ProblemPage() {
   }
 
   if (!problem) return <p className="muted">Loading...</p>;
+
+  const displayedTest = selectedTestIndex !== null ? result?.tests?.[selectedTestIndex] : null;
 
   return (
     <div className="problem-layout">
@@ -102,6 +111,71 @@ export default function ProblemPage() {
                 · {result.passed}/{result.total} tests passed
               </span>
             ) : null}
+
+            {result.tests && result.tests.length > 0 && (
+              <div className="test-boxes">
+                {result.tests.map((t, idx) => {
+                  let icon = '✓';
+                  let statusClass = 'ac';
+                  if (t.verdict === 'TLE') {
+                    icon = '⏱';
+                    statusClass = 'tle';
+                  } else if (!t.passed) {
+                    icon = '✕';
+                    statusClass = 'wa';
+                  }
+                  const isSelected = selectedTestIndex === idx;
+                  return (
+                    <button
+                      key={t.testIndex}
+                      type="button"
+                      className={`test-box ${statusClass} ${isSelected ? 'selected' : ''}`}
+                      onClick={() => setSelectedTestIndex(idx)}
+                      title={`Test ${t.testIndex}: ${VERDICT_LABELS[t.verdict] || t.verdict}`}
+                      aria-label={`Test ${t.testIndex}: ${VERDICT_LABELS[t.verdict] || t.verdict}`}
+                    >
+                      {icon}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {displayedTest && (
+              <div className="test-details">
+                <div className="test-details-title">
+                  Test {displayedTest.testIndex}{' '}
+                  {displayedTest.passed
+                    ? '(Passed)'
+                    : `(${VERDICT_LABELS[displayedTest.verdict] || displayedTest.verdict})`}
+                </div>
+                <div className="test-comparison-grid">
+                  <div className="test-column">
+                    <div className="test-column-header">Input</div>
+                    <pre>{displayedTest.input || <span className="muted">(empty)</span>}</pre>
+                  </div>
+                  <div className="test-column">
+                    <div className="test-column-header">Expected Output</div>
+                    <pre>{displayedTest.expected || <span className="muted">(empty)</span>}</pre>
+                  </div>
+                  <div className="test-column">
+                    <div className="test-column-header">Your Output</div>
+                    <pre>
+                      {displayedTest.verdict === 'TLE' ? (
+                        <span className="muted">Time Limit Exceeded</span>
+                      ) : displayedTest.actual ? (
+                        displayedTest.actual
+                      ) : displayedTest.message ? (
+                        displayedTest.message
+                      ) : (
+                        <span className="muted">(no output)</span>
+                      )}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {result.message && <pre>{result.message}</pre>}
           </div>
         )}
