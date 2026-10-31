@@ -124,6 +124,33 @@ a.button {
   font-size: 14px;
 }
 
+.password-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.password-input-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.password-toggle {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 7px 9px;
+}
+
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 button.ghost {
   background: transparent;
   color: var(--text);
