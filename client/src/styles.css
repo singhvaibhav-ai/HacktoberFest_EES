@@ -198,3 +198,28 @@ select {
   white-space: pre-wrap;
   font-size: 13px;
 }
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 70px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 6px;
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+}
+
+.password-toggle-btn:hover {
+  color: var(--text);
+}
