@@ -27,6 +27,12 @@ body {
   color: var(--text);
 }
 
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 a {
   color: var(--accent);
   text-decoration: none;
@@ -69,6 +75,25 @@ a {
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
+  width: 100%;
+  flex: 1;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.footer p {
+  margin: 0;
 }
 
 button {
