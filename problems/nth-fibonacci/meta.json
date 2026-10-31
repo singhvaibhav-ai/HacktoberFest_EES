@@ -1,0 +1,7 @@
+{
+  "title": "Nth Fibonacci",
+  "difficulty": "Easy",
+  "tags": ["basics"],
+  "order": 11,
+  "timeLimitMs": 2000
+}
