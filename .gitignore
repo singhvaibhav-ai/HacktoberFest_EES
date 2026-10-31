@@ -5,3 +5,7 @@ client/public/pyodide/
 .env
 .DS_Store
 *.log
+
+.CodeArena_LLM_Issue_Guide.md
+.CONTRIBUTING.md
+fix-issue-57.md

@@ -32,9 +32,9 @@ export function listSubmissions({ slug, username } = {}) {
   );
 }
 
-export function addUser({ username, password }) {
+export function addUser({ username, passwordHash }) {
   const db = load();
-  const user = { id: db.users.length + 1, createdAt: new Date().toISOString(), username, password };
+  const user = { id: db.users.length + 1, createdAt: new Date().toISOString(), username, passwordHash };
   db.users.push(user);
   save(db);
   return user;
@@ -42,4 +42,16 @@ export function addUser({ username, password }) {
 
 export function findUser(username) {
   return load().users.find((u) => u.username === username);
+}
+
+export function updateUser(username, fields) {
+  const db = load();
+  const user = db.users.find((u) => u.username === username);
+  if (!user) return null;
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === null) delete user[key];
+    else user[key] = value;
+  }
+  save(db);
+  return user;
 }
