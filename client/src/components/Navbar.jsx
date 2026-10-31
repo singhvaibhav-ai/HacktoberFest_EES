@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 
 export default function Navbar() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
   const { user, checking, logout } = useAuth();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }, [dark]);
 
   return (
     <nav className={`navbar ${dark ? 'dark' : ''}`}>
@@ -29,7 +34,7 @@ export default function Navbar() {
           </Link>
         </>
       )}
-      <button className="ghost" onClick={() => setDark(!dark)} title="Toggle dark mode">
+      <button className="ghost" onClick={() => setDark((current) => !current)} title="Toggle dark mode">
         {dark ? '☀️' : '🌙'}
       </button>
     </nav>
