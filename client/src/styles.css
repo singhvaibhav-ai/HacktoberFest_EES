@@ -140,6 +140,51 @@ select {
   font-size: 14px;
 }
 
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filters .filter-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filters .checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filters .checkbox-label.disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.filters .checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.filters .checkbox-label.disabled input[type="checkbox"] {
+  cursor: not-allowed;
+}
+
+.filters .login-hint {
+  font-size: 12px;
+}
+
+.empty-message {
+  text-align: center;
+  padding: 24px;
+  color: var(--muted);
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;

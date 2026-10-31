@@ -12,6 +12,8 @@ export const api = {
   problem: (slug) => request(`/api/problems/${slug}`),
   submissions: (slug, username) =>
     request(`/api/submissions?slug=${encodeURIComponent(slug)}&username=${encodeURIComponent(username)}`),
+  userSubmissions: (username) =>
+    request(`/api/submissions?username=${encodeURIComponent(username)}`),
   submit: (body) => request('/api/submissions', { method: 'POST', body: JSON.stringify(body) }),
   leaderboard: () => request('/api/leaderboard'),
   me: () => request('/api/auth/me'),
