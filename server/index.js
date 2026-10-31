@@ -42,6 +42,15 @@ app.get('/api/submissions', (req, res) => {
   res.json(listSubmissions({ slug, username }));
 });
 
+app.get('/api/solved', (req, res) => {
+  const username = req.user?.username || req.query.username;
+  if (!username) return res.json([]);
+  const solved = listSubmissions({ username })
+    .filter((s) => s.verdict === 'AC')
+    .map((s) => s.slug);
+  res.json(Array.from(new Set(solved)));
+});
+
 app.get('/api/leaderboard', (req, res) => {
   const scores = {};
   for (const s of listSubmissions()) {
