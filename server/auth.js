@@ -1,4 +1,4 @@
-// Team accounts: sign up, log in, log out.
+// Team accounts: sign up, log in, log out, GitHub OAuth.
 // Sessions live in memory, so everyone has to log in again after the server restarts.
 import crypto from 'node:crypto';
 import { addUser, findUser } from './db.js';
@@ -70,5 +70,130 @@ export function authRoutes(app) {
 
   app.get('/api/auth/me', (req, res) => {
     res.json(req.user);
+  });
+
+  // Start GitHub OAuth flow
+  app.get('/api/auth/github', (req, res) => {
+    const clientId = process.env.GITHUB_CLIENT_ID;
+    const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+    const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+    const next = req.query.next || '/';
+
+    if (!clientId || !clientSecret) {
+      return res.redirect(
+        `${clientOrigin}/login?error=${encodeURIComponent(
+          'GitHub OAuth is not configured. Please set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in .env'
+        )}`
+      );
+    }
+
+    const state = crypto.randomBytes(16).toString('hex');
+    res.cookie('github_oauth_state', state, { httpOnly: true, sameSite: 'lax', maxAge: 10 * 60 * 1000 });
+    res.cookie('github_oauth_next', String(next), { httpOnly: true, sameSite: 'lax', maxAge: 10 * 60 * 1000 });
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      state,
+      scope: 'read:user',
+    });
+    res.redirect(`https://github.com/login/oauth/authorize?${params.toString()}`);
+  });
+
+  // GitHub OAuth callback
+  app.get('/api/auth/github/callback', async (req, res) => {
+    const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+    const { code, state, error, error_description } = req.query;
+
+    if (error) {
+      return res.redirect(
+        `${clientOrigin}/login?error=${encodeURIComponent(error_description || error || 'GitHub authorization was denied')}`
+      );
+    }
+
+    const storedState = readCookie(req, 'github_oauth_state');
+    const returnTo = readCookie(req, 'github_oauth_next') || '/';
+    res.clearCookie('github_oauth_state');
+    res.clearCookie('github_oauth_next');
+
+    // State check to stop CSRF
+    if (!state || !storedState || state !== storedState) {
+      return res.redirect(
+        `${clientOrigin}/login?error=${encodeURIComponent('Invalid OAuth state. Potential CSRF attack.')}`
+      );
+    }
+
+    if (!code) {
+      return res.redirect(
+        `${clientOrigin}/login?error=${encodeURIComponent('No authorization code received from GitHub')}`
+      );
+    }
+
+    try {
+      // Swap code for access token
+      const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          client_id: process.env.GITHUB_CLIENT_ID,
+          client_secret: process.env.GITHUB_CLIENT_SECRET,
+          code,
+        }),
+      });
+
+      const tokenData = await tokenRes.json();
+      if (!tokenRes.ok || tokenData.error || !tokenData.access_token) {
+        return res.redirect(
+          `${clientOrigin}/login?error=${encodeURIComponent(
+            tokenData.error_description || tokenData.error || 'Failed to exchange GitHub authorization code'
+          )}`
+        );
+      }
+
+      // Fetch user profile from GitHub API
+      const userRes = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `Bearer ${tokenData.access_token}`,
+          'User-Agent': 'CodeArena-OAuth',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!userRes.ok) {
+        return res.redirect(
+          `${clientOrigin}/login?error=${encodeURIComponent('Failed to fetch user profile from GitHub')}`
+        );
+      }
+
+      const userData = await userRes.json();
+      const githubUsername = userData.login;
+      if (!githubUsername) {
+        return res.redirect(
+          `${clientOrigin}/login?error=${encodeURIComponent('GitHub account does not have a username')}`
+        );
+      }
+
+      // Find or create account
+      let user = findUser(githubUsername);
+      if (!user) {
+        user = addUser({
+          username: githubUsername,
+          password: '',
+          githubId: userData.id,
+        });
+      }
+
+      // Start session cookie
+      startSession(res, user.username);
+
+      const target = returnTo.startsWith('/') ? returnTo : '/';
+      res.redirect(`${clientOrigin}${target}`);
+    } catch (err) {
+      res.redirect(
+        `${clientOrigin}/login?error=${encodeURIComponent(`GitHub login failed: ${err.message}`)}`
+      );
+    }
   });
 }
