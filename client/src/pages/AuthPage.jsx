@@ -21,7 +21,11 @@ export default function AuthPage({ mode }) {
       else await login(username, password);
       navigate('/');
     } catch (err) {
-      setError(err.message);
+      if (err.status === 429 && !err.message?.startsWith('Too many attempts')) {
+        setError('Too many attempts, try again in 10 minutes');
+      } else {
+        setError(err.message || 'Something went wrong');
+      }
     } finally {
       setBusy(false);
     }

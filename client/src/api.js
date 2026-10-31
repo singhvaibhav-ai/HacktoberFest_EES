@@ -3,7 +3,29 @@ async function request(path, options) {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+  if (!res.ok) {
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      // not JSON
+    }
+    let message = data && data.error;
+    if (!message) {
+      if (res.status === 429) {
+        const retryAfter = res.headers.get('Retry-After');
+        const minutes = retryAfter ? Math.max(1, Math.ceil(Number(retryAfter) / 60)) : 10;
+        message = `Too many attempts, try again in ${minutes} minute${minutes === 1 ? '' : 's'}`;
+      } else {
+        message = `Request failed: ${res.status}`;
+      }
+    }
+    const err = new Error(message);
+    err.status = res.status;
+    err.data = data;
+    err.response = res;
+    throw err;
+  }
   return res.json();
 }
 
