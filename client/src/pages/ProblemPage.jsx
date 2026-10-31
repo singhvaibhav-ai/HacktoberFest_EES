@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { marked } from 'marked';
 import { api } from '../api.js';
-import { judge } from '../judge/runner.js';
+import { judge, warmUp } from '../judge/runner.js';
 import { VERDICT_LABELS } from '../judge/verdict.js';
 import { LANGUAGES } from '../languages.js';
 import { useAuth } from '../auth.jsx';
@@ -19,6 +19,11 @@ export default function ProblemPage() {
   const [result, setResult] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [busy, setBusy] = useState(false);
+
+  // Load Python in the background while the user reads the problem.
+  useEffect(() => {
+    warmUp();
+  }, []);
 
   useEffect(() => {
     setProblem(null);

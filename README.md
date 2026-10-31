@@ -25,7 +25,7 @@ It works... mostly. Some verdicts are wrong, the leaderboard page is empty, only
 Your code never runs on a server. It runs **inside your own browser**:
 
 - Python runs through [Pyodide](https://pyodide.org/), which is Python compiled to WebAssembly.
-- The code runs in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API), so an infinite loop can't freeze the page. When the time limit runs out, the page kills the worker.
+- The code runs in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API), so an infinite loop can't freeze the page. When the time limit runs out, the page kills the worker and starts a fresh one. Otherwise the same worker is reused, so Python only loads once.
 - The page compares your output with the expected output and works out the verdict.
 - The small Express server stores team accounts and submissions, and serves problems and the leaderboard.
 - Like LeetCode, anyone can read problems and write code, but you need a team account to **submit**.
@@ -55,7 +55,7 @@ npm run dev
 Open http://localhost:5173, click **Sign up** to create a team account, and solve **Hello, Arena!**
 
 - The frontend runs on port 5173 and the API on port 4000.
-- The first submission takes a few seconds while Python loads in your browser.
+- Python starts loading in your browser when you open a problem, which takes a few seconds. After that, submissions start right away.
 
 ## Contributing
 
