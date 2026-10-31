@@ -18,6 +18,8 @@ A tiny online judge, like a mini LeetCode, built for **HackDay x Hacktoberfest 2
 
 Pick a problem, write a solution, hit **Submit**, and get a verdict: Accepted, Wrong Answer, Time Limit Exceeded, Runtime Error or Compilation Error.
 
+See [the verdict guide](docs/verdicts.md) for explanations, examples and tips for fixing each result.
+
 It works... mostly. Some verdicts are wrong, the leaderboard page is empty, only Python is supported, and dark mode is half-done. **That's where you come in.** Check the [Issues](../../issues) tab, pick one, and send a pull request.
 
 ## How it works
