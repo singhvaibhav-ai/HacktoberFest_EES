@@ -1,5 +1,5 @@
 // Languages shown in the editor's dropdown.
-// Only Python can actually run right now; the others are waiting for someone to add them!
+// Python and JavaScript can run; the others are waiting for someone to add them!
 export const LANGUAGES = [
   {
     id: 'python',
@@ -8,7 +8,13 @@ export const LANGUAGES = [
     enabled: true,
     template: '# Read input with input(), print your answer with print()\n\n',
   },
-  { id: 'javascript', label: 'JavaScript (coming soon)', monaco: 'javascript', enabled: false, template: '' },
+  {
+    id: 'javascript',
+    label: 'JavaScript',
+    monaco: 'javascript',
+    enabled: true,
+    template: '// Read input with readline() (or input()), print your answer with console.log()\n\n',
+  },
   { id: 'lua', label: 'Lua (coming soon)', monaco: 'lua', enabled: false, template: '' },
   { id: 'ruby', label: 'Ruby (coming soon)', monaco: 'ruby', enabled: false, template: '' },
 ];

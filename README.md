@@ -18,13 +18,14 @@ A tiny online judge, like a mini LeetCode, built for **HackDay x Hacktoberfest 2
 
 Pick a problem, write a solution, hit **Submit**, and get a verdict: Accepted, Wrong Answer, Time Limit Exceeded, Runtime Error or Compilation Error.
 
-It works... mostly. Some verdicts are wrong, the leaderboard page is empty, only Python is supported, and dark mode is half-done. **That's where you come in.** Check the [Issues](../../issues) tab, pick one, and send a pull request.
+It works... mostly. Some verdicts are wrong, the leaderboard page is empty, and dark mode is half-done. **That's where you come in.** Check the [Issues](../../issues) tab, pick one, and send a pull request.
 
 ## How it works
 
 Your code never runs on a server. It runs **inside your own browser**:
 
 - Python runs through [Pyodide](https://pyodide.org/), which is Python compiled to WebAssembly.
+- JavaScript runs natively in its own worker. Your code gets `readline()`/`input()` for the test input, and whatever you pass to `console.log` becomes the output.
 - The code runs in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API), so an infinite loop can't freeze the page. When the time limit runs out, the page kills the worker.
 - The page compares your output with the expected output and works out the verdict.
 - The small Express server stores team accounts and submissions, and serves problems and the leaderboard.
@@ -33,6 +34,7 @@ Your code never runs on a server. It runs **inside your own browser**:
 ```
 client/            React + Vite frontend
   public/python-worker.js   runs Python in a Web Worker
+  public/javascript-worker.js  runs JavaScript in a Web Worker
   src/judge/                runner, output comparison, verdicts
   src/pages/                Problem list, problem page, leaderboard, log in / sign up
   src/auth.jsx              who is logged in (React context)
