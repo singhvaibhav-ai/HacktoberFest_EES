@@ -1,0 +1,7 @@
+{
+  "title": "Nth Fibonacci",
+  "difficulty": "Easy",
+  "tags": ["math", "dynamic-programming"],
+  "order": 9,
+  "timeLimitMs": 2000
+}
