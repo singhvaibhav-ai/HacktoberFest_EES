@@ -1,0 +1,7 @@
+{
+  "title": "Anagram Check",
+  "difficulty": "Easy",
+  "tags": ["basics"],
+  "order": 15,
+  "timeLimitMs": 2000
+}
