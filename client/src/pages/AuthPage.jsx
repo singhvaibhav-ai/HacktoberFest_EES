@@ -1,8 +1,8 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 
-// One page for both "Log in" and "Sign up"; mode decides which.
+// Team B124-B125 (Leader: Sashank, Members: Harshek, Pratham)
 export default function AuthPage({ mode }) {
   const isSignup = mode === 'signup';
   const { login, signup } = useAuth();
@@ -21,7 +21,12 @@ export default function AuthPage({ mode }) {
       else await login(username, password);
       navigate('/');
     } catch (err) {
-      setError(err.message);
+      // Friendly message handling for HTTP 429 rate limiting
+      let msg = err.message;
+      if (msg.includes('429') || msg.toLowerCase().includes('too many')) {
+        msg = 'Too many attempts, try again in 10 minutes.';
+      }
+      setError(msg);
     } finally {
       setBusy(false);
     }
