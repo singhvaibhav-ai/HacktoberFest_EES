@@ -6,6 +6,39 @@ import { addUser, findUser } from './db.js';
 const COOKIE = 'codearena_session';
 const sessions = new Map(); // token -> username
 
+const LOGIN_ATTEMPT_LIMIT = 5;
+const LOGIN_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const failedLogins = new Map(); // key -> [timestamps]
+
+function getAttemptKey(req, username) {
+  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+  const name = String(username || '').trim().toLowerCase();
+  return `${ip}:${name}`;
+}
+
+function checkLoginRateLimit(key) {
+  const now = Date.now();
+  const times = (failedLogins.get(key) || []).filter((t) => now - t < LOGIN_WINDOW_MS);
+  failedLogins.set(key, times);
+  if (times.length >= LOGIN_ATTEMPT_LIMIT) {
+    const oldest = times[0];
+    const retryAfterSec = Math.max(1, Math.ceil((oldest + LOGIN_WINDOW_MS - now) / 1000));
+    return retryAfterSec;
+  }
+  return 0;
+}
+
+function recordLoginFailure(key) {
+  const now = Date.now();
+  const times = (failedLogins.get(key) || []).filter((t) => now - t < LOGIN_WINDOW_MS);
+  times.push(now);
+  failedLogins.set(key, times);
+}
+
+function resetLoginAttempts(key) {
+  failedLogins.delete(key);
+}
+
 function readCookie(req, name) {
   const header = req.headers.cookie || '';
   for (const part of header.split(';')) {
@@ -52,13 +85,24 @@ export function authRoutes(app) {
   app.post('/api/auth/login', (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
+    const key = getAttemptKey(req, username);
+
+    const retryAfter = checkLoginRateLimit(key);
+    if (retryAfter > 0) {
+      res.setHeader('Retry-After', retryAfter);
+      const minutes = Math.ceil(retryAfter / 60);
+      return res.status(429).json({
+        error: `Too many attempts, try again in ${minutes} minute${minutes > 1 ? 's' : ''}`,
+      });
+    }
+
     const user = findUser(username);
-    if (!user) {
-      return res.status(401).json({ error: 'No team with that name' });
+    if (!user || user.password !== password) {
+      recordLoginFailure(key);
+      return res.status(401).json({ error: 'Wrong team name or password' });
     }
-    if (user.password !== password) {
-      return res.status(401).json({ error: 'Wrong password' });
-    }
+
+    resetLoginAttempts(key);
     startSession(res, user.username);
     res.json({ username: user.username });
   });
