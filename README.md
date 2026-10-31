@@ -25,6 +25,7 @@ It works... mostly. Some verdicts are wrong, the leaderboard page is empty, only
 Your code never runs on a server. It runs **inside your own browser**:
 
 - Python runs through [Pyodide](https://pyodide.org/), which is Python compiled to WebAssembly.
+- Lua runs through [Fengari](https://fengari.io/), a Lua VM written in JavaScript.
 - The code runs in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API), so an infinite loop can't freeze the page. When the time limit runs out, the page kills the worker.
 - The page compares your output with the expected output and works out the verdict.
 - The small Express server stores team accounts and submissions, and serves problems and the leaderboard.
@@ -33,6 +34,7 @@ Your code never runs on a server. It runs **inside your own browser**:
 ```
 client/            React + Vite frontend
   public/python-worker.js   runs Python in a Web Worker
+  public/lua-worker.js      runs Lua in a Web Worker (Fengari)
   src/judge/                runner, output comparison, verdicts
   src/pages/                Problem list, problem page, leaderboard, log in / sign up
   src/auth.jsx              who is logged in (React context)
