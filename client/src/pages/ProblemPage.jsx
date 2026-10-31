@@ -47,7 +47,7 @@ export default function ProblemPage() {
     try {
       const res = await judge(code, problem, setStatus);
       setResult(res);
-      await api.submit({ username: user.username, slug, language: language.id, code, ...res });
+      await api.submit({ slug, language: language.id, code, ...res });
       loadSubmissions();
     } catch (err) {
       setResult({ verdict: 'RE', message: String(err) });
