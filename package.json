@@ -14,7 +14,7 @@
     "dev": "concurrently -n server,client -c blue,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w client",
     "start": "npm start -w server",
-    "test": "node -e \"console.log('No tests yet. See the unit tests issue.')\""
+    "test": "npm test -w client"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
