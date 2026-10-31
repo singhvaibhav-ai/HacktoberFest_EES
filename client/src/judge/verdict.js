@@ -3,10 +3,11 @@
 //   WA  Wrong Answer
 //   TLE Time Limit Exceeded
 //   RE  Runtime Error
-//   CE  Compilation Error (for Python: a SyntaxError)
+//   CE  Compilation Error (for Python and Lua: a syntax error)
 export function toVerdict(result) {
   if (result.type === 'ok') return result.passed ? 'AC' : 'WA';
   if (result.type === 'syntax') return 'CE';
+  if (result.type === 'timeout') return 'TLE';
   // anything else means the program crashed
   return 'RE';
 }
