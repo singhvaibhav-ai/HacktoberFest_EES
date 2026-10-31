@@ -40,7 +40,7 @@ export async function judge(code, problem, onStatus = () => {}) {
   await ready;
 
   const timeLimitMs = problem.timeLimitMs ?? problem.timeLimit ?? DEFAULT_TIME_LIMIT_MS;
-  const tests = problem.tests.slice(0, 1);
+  const tests = problem.tests || [];
   let passed = 0;
 
   for (let i = 0; i < tests.length; i++) {
