@@ -77,6 +77,7 @@ problems/two-sum/
 ```
 
 - Use a lowercase folder name with dashes (`two-sum`, not `Two Sum`).
+- `timeLimitMs` is the time limit per test, in milliseconds. Use `2000` unless the problem genuinely needs more.
 - Add at least 5 tests, including tricky edge cases.
 - Write your own solution and make sure it gets Accepted before you open the PR.
 
