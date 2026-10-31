@@ -330,3 +330,15 @@ tr.leaderboard-me {
 .dark .verdict-ce {
   color: #9a9aab;
 }
+
+.not-found {
+  text-align: center;
+  padding: 48px 0;
+}
+
+.not-found h1 {
+  margin: 0 0 8px;
+  font-size: 64px;
+  line-height: 1;
+  color: var(--accent);
+}

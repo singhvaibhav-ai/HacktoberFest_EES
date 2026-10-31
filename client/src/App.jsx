@@ -5,6 +5,7 @@ import ProblemPage from './pages/ProblemPage.jsx';
 import Leaderboard from './pages/Leaderboard.jsx';
 import AuthPage from './pages/AuthPage.jsx';
 import { AuthProvider } from './auth.jsx';
+import NotFound from './pages/NotFound.jsx';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/login" element={<AuthPage mode="login" />} />
           <Route path="/signup" element={<AuthPage mode="signup" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
     </AuthProvider>

@@ -8,6 +8,7 @@ import { LANGUAGES } from '../languages.js';
 import { useAuth } from '../auth.jsx';
 import CodeEditor from '../components/CodeEditor.jsx';
 import DifficultyBadge from '../components/DifficultyBadge.jsx';
+import NotFound from './NotFound.jsx';
 
 export default function ProblemPage() {
   const { slug } = useParams();
@@ -20,12 +21,16 @@ export default function ProblemPage() {
   const [result, setResult] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setProblem(null);
     setResult(null);
+    setError('');
     setCode(language.template);
-    api.problem(slug).then(setProblem);
+    api.problem(slug)
+      .then(setProblem)
+      .catch(() => setError('not-found')); // 404, or the server is down
   }, [slug]);
 
   useEffect(() => {
@@ -58,6 +63,14 @@ export default function ProblemPage() {
     }
   }
 
+  if (error) {
+    return (
+      <NotFound
+        title="Problem not found"
+        message={`No problem lives at /problems / ${slug}. It may have been renamed or removed.`}
+      />
+    );
+  }
   if (!problem) return <p className="muted">Loading...</p>;
 
   return (
