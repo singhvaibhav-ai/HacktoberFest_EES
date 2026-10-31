@@ -1,0 +1,8 @@
+{
+  "title": "Euclidean Distance",
+  "difficulty": "Easy",
+  "tags": ["math", "geometry"],
+  "order": 6,
+  "timeLimitMs": 2000,
+  "checker": "float"
+}

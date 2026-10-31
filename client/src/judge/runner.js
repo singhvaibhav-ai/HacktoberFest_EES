@@ -48,7 +48,7 @@ export async function judge(code, problem, onStatus = () => {}) {
     const result = await runTest(worker, code, tests[i].input, timeLimitMs);
 
     if (result.type === 'ok') {
-      result.passed = outputsMatch(result.stdout, tests[i].output);
+      result.passed = outputsMatch(result.stdout, tests[i].output, problem.checker);
     }
     const verdict = toVerdict(result);
     if (verdict !== 'AC') {
