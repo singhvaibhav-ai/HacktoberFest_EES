@@ -21,7 +21,12 @@ export default function AuthPage({ mode }) {
       else await login(username, password);
       navigate('/');
     } catch (err) {
-      setError(err.message);
+      if (!isSignup && err.status === 429) {
+        const retryMinutes = Math.max(1, Math.ceil(Number(err.retryAfter || 60) / 60));
+        setError(`Too many attempts, try again in ${retryMinutes} minute${retryMinutes === 1 ? '' : 's'}.`);
+      } else {
+        setError(err.message);
+      }
     } finally {
       setBusy(false);
     }
