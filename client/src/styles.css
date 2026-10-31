@@ -124,6 +124,23 @@ a.button {
   font-size: 14px;
 }
 
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.password-input-wrapper input {
+  flex: 1;
+  padding-right: 44px;
+}
+
+.password-toggle {
+  padding: 0 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
 button.ghost {
   background: transparent;
   color: var(--text);
