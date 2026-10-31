@@ -41,5 +41,6 @@ export function addUser({ username, password }) {
 }
 
 export function findUser(username) {
-  return load().users.find((u) => u.username === username);
+  const needle = String(username || '').trim().toLowerCase();
+  return load().users.find((u) => String(u.username || '').trim().toLowerCase() === needle);
 }
