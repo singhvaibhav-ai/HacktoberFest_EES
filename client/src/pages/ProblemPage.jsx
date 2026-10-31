@@ -10,6 +10,8 @@ import CodeEditor from '../components/CodeEditor.jsx';
 import DifficultyBadge from '../components/DifficultyBadge.jsx';
 import NotFound from './NotFound.jsx';
 
+const draftKey = (slug, languageId) => `codearena:code:${slug}:${languageId}`;
+
 export default function ProblemPage() {
   const { slug } = useParams();
   const { user } = useAuth();
@@ -28,7 +30,6 @@ export default function ProblemPage() {
     setProblem(null);
     setResult(null);
     setError('');
-    setCode(language.template);
     setCopied(false);
     api.problem(slug)
       .then(setProblem)
@@ -56,7 +57,7 @@ export default function ProblemPage() {
 
   function resetCode() {
     if (window.confirm('Reset the editor to the starter template?')) {
-      setCode(language.template);
+      updateCode(language.template);
       setCopied(false);
     }
   }
@@ -81,6 +82,25 @@ export default function ProblemPage() {
       setBusy(false);
     }
   }
+
+  function updateCode(value) {
+    setCode(value);
+    try {
+      localStorage.setItem(draftKey(slug, language.id), value);
+    } catch {
+      // storage blocked or full — the editor still works, just won't persist
+    }
+  }
+
+  useEffect(() => {
+    let saved = null;
+    try {
+      saved = localStorage.getItem(draftKey(slug, language.id));
+    } catch {
+      // storage unavailable — fall back to the template
+    }
+    setCode(saved ?? language.template);
+  }, [slug, language]);
 
   if (error) {
     return (
@@ -129,7 +149,7 @@ export default function ProblemPage() {
           </button>
         </div>
 
-        <CodeEditor language={language.monaco} value={code} onChange={setCode} />
+        <CodeEditor language={language.monaco} value={code} onChange={updateCode} />
 
         {busy && (
           <p className="status-line">
