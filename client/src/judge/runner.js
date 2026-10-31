@@ -3,11 +3,15 @@ import { toVerdict } from './verdict.js';
 
 const DEFAULT_TIME_LIMIT_MS = 2000;
 
-function startWorker() {
-  const worker = new Worker('/python-worker.js', { type: 'module' });
+function startWorker(language = 'python') {
+  const isLua = language === 'lua';
+  const workerPath = isLua ? '/lua-worker.js' : '/python-worker.js';
+  const workerOptions = isLua ? {} : { type: 'module' };
+  
+  const worker = new Worker(workerPath, workerOptions);
   const ready = new Promise((resolve, reject) => {
     worker.onmessage = (e) => e.data.type === 'ready' && resolve();
-    worker.onerror = (e) => reject(new Error(e.message || 'Could not start Python'));
+    worker.onerror = (e) => reject(new Error(e.message || `Could not start ${language}`));
   });
   worker.postMessage({ type: 'init' });
   return { worker, ready };
@@ -34,13 +38,13 @@ function runTest(worker, code, input, timeLimitMs) {
  * onStatus is called with short status messages for the UI.
  * Returns { verdict, passed, total, message }.
  */
-export async function judge(code, problem, onStatus = () => {}) {
-  onStatus('Starting Python...');
-  const { worker, ready } = startWorker();
+export async function judge(code, problem, onStatus = () => {}, language = 'python') {
+  onStatus(`Starting ${language === 'lua' ? 'Lua' : 'Python'}...`);
+  const { worker, ready } = startWorker(language);
   await ready;
 
   const timeLimitMs = problem.timeLimitMs ?? problem.timeLimit ?? DEFAULT_TIME_LIMIT_MS;
-  const tests = problem.tests.slice(0, 1);
+  const tests = problem.tests;
   let passed = 0;
 
   for (let i = 0; i < tests.length; i++) {
