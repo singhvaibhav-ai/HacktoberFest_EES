@@ -32,9 +32,17 @@ export function listSubmissions({ slug, username } = {}) {
   );
 }
 
-export function addUser({ username, password }) {
+export function addUser({ username, password, githubId, email, authProvider }) {
   const db = load();
-  const user = { id: db.users.length + 1, createdAt: new Date().toISOString(), username, password };
+  const user = {
+    id: db.users.length + 1,
+    createdAt: new Date().toISOString(),
+    username,
+    password: password || null,
+    githubId: githubId ? String(githubId) : null,
+    email: email || null,
+    authProvider: authProvider || 'local',
+  };
   db.users.push(user);
   save(db);
   return user;
@@ -42,4 +50,8 @@ export function addUser({ username, password }) {
 
 export function findUser(username) {
   return load().users.find((u) => u.username === username);
+}
+
+export function findUserByGithubId(githubId) {
+  return load().users.find((u) => u.githubId && String(u.githubId) === String(githubId));
 }
