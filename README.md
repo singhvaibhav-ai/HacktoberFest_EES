@@ -18,13 +18,14 @@ A tiny online judge, like a mini LeetCode, built for **HackDay x Hacktoberfest 2
 
 Pick a problem, write a solution, hit **Submit**, and get a verdict: Accepted, Wrong Answer, Time Limit Exceeded, Runtime Error or Compilation Error.
 
-It works... mostly. Some verdicts are wrong, the leaderboard page is empty, only Python is supported, and dark mode is half-done. **That's where you come in.** Check the [Issues](../../issues) tab, pick one, and send a pull request.
+It works... mostly. Some verdicts are wrong, the leaderboard page is empty, only Python and C/C++ are supported, and dark mode is half-done. **That's where you come in.** Check the [Issues](../../issues) tab, pick one, and send a pull request.
 
 ## How it works
 
 Your code never runs on a server. It runs **inside your own browser**:
 
 - Python runs through [Pyodide](https://pyodide.org/), which is Python compiled to WebAssembly.
+- C and C++ are compiled by [Clang](https://clang.llvm.org/), itself compiled to WebAssembly by [YoWASP](https://yowasp.org/). Your program becomes WebAssembly too, and runs in the same kind of worker.
 - The code runs in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API), so an infinite loop can't freeze the page. When the time limit runs out, the page kills the worker.
 - The page compares your output with the expected output and works out the verdict.
 - The small Express server stores team accounts and submissions, and serves problems and the leaderboard.
@@ -33,6 +34,7 @@ Your code never runs on a server. It runs **inside your own browser**:
 ```
 client/            React + Vite frontend
   public/python-worker.js   runs Python in a Web Worker
+  public/clang-worker.js    compiles and runs C/C++ in a Web Worker
   src/judge/                runner, output comparison, verdicts
   src/pages/                Problem list, problem page, leaderboard, log in / sign up
   src/auth.jsx              who is logged in (React context)
@@ -56,6 +58,7 @@ Open http://localhost:5173, click **Sign up** to create a team account, and solv
 
 - The frontend runs on port 5173 and the API on port 4000.
 - The first submission takes a few seconds while Python loads in your browser.
+- The first C/C++ submission downloads the compiler (about 100 MB, or about 27 MB if your server compresses it). After that your browser keeps it cached.
 
 ## Contributing
 

@@ -2,6 +2,7 @@ node_modules/
 dist/
 server/data/
 client/public/pyodide/
+client/public/clang/
 .env
 .DS_Store
 *.log
