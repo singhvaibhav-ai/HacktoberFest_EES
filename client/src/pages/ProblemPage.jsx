@@ -13,18 +13,28 @@ export default function ProblemPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [problem, setProblem] = useState(null);
+  const [contest, setContest] = useState(null);
   const [language, setLanguage] = useState(LANGUAGES[0]);
   const [code, setCode] = useState(LANGUAGES[0].template);
   const [status, setStatus] = useState('');
   const [result, setResult] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setProblem(null);
     setResult(null);
+    setError('');
     setCode(language.template);
-    api.problem(slug).then(setProblem);
+    api.contest().then(setContest).catch(() => {});
+    api.problem(slug).then(setProblem).catch((err) => {
+      if (err.status === 403) {
+        setError('Contest has not started yet. This problem is currently hidden.');
+      } else {
+        setError('Problem not found');
+      }
+    });
   }, [slug]);
 
   useEffect(() => {
@@ -36,8 +46,11 @@ export default function ProblemPage() {
     api.submissions(slug, user.username).then(setSubmissions);
   }
 
+  const isContestUpcoming = contest?.enabled && contest?.status === 'upcoming';
+  const isContestEnded = contest?.enabled && contest?.status === 'ended';
+
   async function submit() {
-    // Like LeetCode: anyone can read and write code, but submitting needs an account.
+    if (isContestEnded) return;
     if (!user) {
       navigate(`/login?next=/problems/${slug}`);
       return;
@@ -55,6 +68,22 @@ export default function ProblemPage() {
       setStatus('');
       setBusy(false);
     }
+  }
+
+  if (isContestUpcoming || error) {
+    return (
+      <section className="contest-banner-card">
+        <h1>Contest Mode</h1>
+        <p className="muted">
+          {error || 'This problem is locked until the contest starts.'}
+        </p>
+        {contest?.start && (
+          <p>
+            <strong>Starts:</strong> {new Date(contest.start).toLocaleString()}
+          </p>
+        )}
+      </section>
+    );
   }
 
   if (!problem) return <p className="muted">Loading...</p>;
@@ -85,10 +114,26 @@ export default function ProblemPage() {
           <button className="ghost" disabled title="Not implemented yet">
             Run
           </button>
-          <button onClick={submit} disabled={busy}>
-            {busy ? 'Judging...' : user ? 'Submit' : 'Log in to submit'}
+          <button
+            onClick={submit}
+            disabled={busy || isContestEnded}
+            title={isContestEnded ? 'Contest has ended. Submissions are closed.' : ''}
+          >
+            {busy
+              ? 'Judging...'
+              : isContestEnded
+              ? 'Contest ended'
+              : user
+              ? 'Submit'
+              : 'Log in to submit'}
           </button>
         </div>
+
+        {isContestEnded && (
+          <p className="muted" style={{ margin: '0 0 10px 0' }}>
+            Contest has ended. Submissions are closed.
+          </p>
+        )}
 
         <CodeEditor language={language.monaco} value={code} onChange={setCode} />
 

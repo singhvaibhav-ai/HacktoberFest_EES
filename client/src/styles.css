@@ -198,3 +198,127 @@ select {
   white-space: pre-wrap;
   font-size: 13px;
 }
+
+/* Contest Mode */
+.contest-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.contest-timer.contest-upcoming {
+  color: #d97706;
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.dark .contest-timer.contest-upcoming {
+  color: #fbbf24;
+  border-color: #78350f;
+  background: #261908;
+}
+
+.contest-timer.contest-running {
+  color: #059669;
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+}
+
+.dark .contest-timer.contest-running {
+  color: #34d399;
+  border-color: #064e3b;
+  background: #06281e;
+}
+
+.contest-timer.contest-frozen {
+  color: #2563eb;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.dark .contest-timer.contest-frozen {
+  color: #60a5fa;
+  border-color: #1e3a8a;
+  background: #0f1c3f;
+}
+
+.contest-timer.contest-ended {
+  color: var(--muted);
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.contest-banner-card {
+  max-width: 600px;
+  margin: 40px auto;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px 24px;
+}
+
+.contest-banner-card h1 {
+  margin-top: 0;
+}
+
+.contest-meta-box {
+  margin-top: 20px;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: inline-block;
+  font-size: 14px;
+}
+
+/* Leaderboard */
+.leaderboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.leaderboard-header h1 {
+  margin: 0;
+}
+
+.freeze-banner {
+  padding: 12px 16px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.dark .freeze-banner {
+  background: #0f1c3f;
+  color: #93c5fd;
+  border-color: #1e3a8a;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  padding: 12px 16px;
+}
+
+.badge-solved {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
