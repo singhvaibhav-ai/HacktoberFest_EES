@@ -7,12 +7,14 @@ import { VERDICT_LABELS } from '../judge/verdict.js';
 import { LANGUAGES } from '../languages.js';
 import { useAuth } from '../auth.jsx';
 import CodeEditor from '../components/CodeEditor.jsx';
+import NotFound from './NotFound.jsx';
 
 export default function ProblemPage() {
   const { slug } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [problem, setProblem] = useState(null);
+  const [notFound, setNotFound] = useState(false);
   const [language, setLanguage] = useState(LANGUAGES[0]);
   const [code, setCode] = useState(LANGUAGES[0].template);
   const [status, setStatus] = useState('');
@@ -24,7 +26,8 @@ export default function ProblemPage() {
     setProblem(null);
     setResult(null);
     setCode(language.template);
-    api.problem(slug).then(setProblem);
+    setNotFound(false);
+    api.problem(slug).then(setProblem).catch(() => setNotFound(true));
   }, [slug]);
 
   useEffect(() => {
@@ -57,6 +60,7 @@ export default function ProblemPage() {
     }
   }
 
+  if (notFound) return <NotFound title="Problem Not Found" message="The requested problem could not be found." />;
   if (!problem) return <p className="muted">Loading...</p>;
 
   return (
