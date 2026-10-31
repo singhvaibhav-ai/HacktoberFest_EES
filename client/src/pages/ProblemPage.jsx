@@ -22,12 +22,14 @@ export default function ProblemPage() {
   const [submissions, setSubmissions] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setProblem(null);
     setResult(null);
     setError('');
     setCode(language.template);
+    setCopied(false);
     api.problem(slug)
       .then(setProblem)
       .catch(() => setError('not-found')); // 404, or the server is down
@@ -40,6 +42,23 @@ export default function ProblemPage() {
   function loadSubmissions() {
     if (!user) return setSubmissions([]);
     api.submissions(slug, user.username).then(setSubmissions);
+  }
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard unavailable (permissions / insecure context) — stay quiet
+    }
+  }
+
+  function resetCode() {
+    if (window.confirm('Reset the editor to the starter template?')) {
+      setCode(language.template);
+      setCopied(false);
+    }
   }
 
   async function submit() {
@@ -95,6 +114,12 @@ export default function ProblemPage() {
               </option>
             ))}
           </select>
+          <button className="ghost" onClick={copyCode} title="Copy code to clipboard">
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+          <button className="ghost" onClick={resetCode} title="Reset to the starter template">
+            Reset
+          </button>
           <div className="spacer" />
           <button className="ghost" disabled title="Not implemented yet">
             Run
