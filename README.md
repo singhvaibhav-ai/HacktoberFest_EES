@@ -1,4 +1,4 @@
-![HackDay x Hacktoberfest 2026, NIT Jamshedpur](docs/banner.jpg)
+﻿![HackDay x Hacktoberfest 2026, NIT Jamshedpur](docs/banner.jpg)
 
 # CodeArena
 
@@ -28,7 +28,7 @@ Your code never runs on a server. It runs **inside your own browser**:
 - The code runs in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API), so an infinite loop can't freeze the page. When the time limit runs out, the page kills the worker.
 - The page compares your output with the expected output and works out the verdict.
 - The small Express server stores team accounts and submissions, and serves problems and the leaderboard.
-- Like LeetCode, anyone can read problems and write code, but you need a team account to **submit**.
+- Like LeetCode, anyone can read problems and write code, but you need a team account to **submit**. See [docs/auth.md](docs/auth.md) for how accounts, cookies, and sessions work.
 
 ```
 client/            React + Vite frontend
