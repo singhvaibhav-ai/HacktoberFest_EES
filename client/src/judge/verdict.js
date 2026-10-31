@@ -7,6 +7,7 @@
 export function toVerdict(result) {
   if (result.type === 'ok') return result.passed ? 'AC' : 'WA';
   if (result.type === 'syntax') return 'CE';
+  if (result.type === 'timeout') return 'TLE';
   // anything else means the program crashed
   return 'RE';
 }
@@ -17,4 +18,12 @@ export const VERDICT_LABELS = {
   TLE: 'Time Limit Exceeded',
   RE: 'Runtime Error',
   CE: 'Compilation Error',
+};
+
+export const VERDICT_CLASSES = {
+  AC: 'verdict-ac',
+  WA: 'verdict-wa',
+  TLE: 'verdict-tle',
+  RE: 'verdict-re',
+  CE: 'verdict-ce',
 };

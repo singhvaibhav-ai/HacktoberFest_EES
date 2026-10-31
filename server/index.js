@@ -43,14 +43,28 @@ app.get('/api/submissions', (req, res) => {
 });
 
 app.get('/api/leaderboard', (req, res) => {
+  // Score = number of DISTINCT problems solved with an Accepted verdict,
+  // so solving the same problem twice never counts twice. Ties: whoever's
+  // last Accepted came in earliest ranks higher; usernames break remaining ties.
   const scores = {};
   for (const s of listSubmissions()) {
     if (s.verdict !== 'AC') continue;
-    scores[s.username] = (scores[s.username] || 0) + 1;
+    if (!scores[s.username]) scores[s.username] = { problems: new Set(), lastAcceptedAt: '' };
+    const entry = scores[s.username];
+    entry.problems.add(s.slug);
+    if (s.createdAt > entry.lastAcceptedAt) entry.lastAcceptedAt = s.createdAt;
   }
   const board = Object.entries(scores)
-    .map(([username, solved]) => ({ username, solved }))
-    .sort((a, b) => b.solved - a.solved);
+    .map(([username, { problems, lastAcceptedAt }]) => ({
+      username,
+      solved: problems.size,
+      lastAcceptedAt,
+    }))
+    .sort((a, b) => {
+      if (b.solved !== a.solved) return b.solved - a.solved;
+      if (a.lastAcceptedAt !== b.lastAcceptedAt) return a.lastAcceptedAt < b.lastAcceptedAt ? -1 : 1;
+      return a.username.localeCompare(b.username);
+    });
   res.json(board);
 });
 

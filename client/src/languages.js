@@ -8,7 +8,13 @@ export const LANGUAGES = [
     enabled: true,
     template: '# Read input with input(), print your answer with print()\n\n',
   },
-  { id: 'javascript', label: 'JavaScript (coming soon)', monaco: 'javascript', enabled: false, template: '' },
+  {
+    id: 'javascript',
+    label: 'JavaScript',
+    monaco: 'javascript',
+    enabled: true,
+    template: '// Read a line with input(), print the answer with console.log()\n\n',
+  },
   { id: 'lua', label: 'Lua (coming soon)', monaco: 'lua', enabled: false, template: '' },
   { id: 'ruby', label: 'Ruby (coming soon)', monaco: 'ruby', enabled: false, template: '' },
 ];

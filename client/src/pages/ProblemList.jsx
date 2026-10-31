@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
+import DifficultyBadge from '../components/DifficultyBadge.jsx';
 
 export default function ProblemList() {
   const [problems, setProblems] = useState([]);
@@ -30,7 +31,7 @@ export default function ProblemList() {
               <td>
                 <Link to={`/problems/${p.slug}`}>{p.title}</Link>
               </td>
-              <td>{p.difficulty}</td>
+              <td><DifficultyBadge difficulty={p.difficulty} /></td>
               <td>{p.tags?.join(', ')}</td>
             </tr>
           ))}

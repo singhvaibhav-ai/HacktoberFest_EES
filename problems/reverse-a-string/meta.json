@@ -1,0 +1,9 @@
+{
+    "title": "Reverse a String",
+    "difficulty": "Easy",
+    "tags": [
+        "strings"
+    ],
+    "order": 6,
+    "timeLimitMs": 2000
+}
