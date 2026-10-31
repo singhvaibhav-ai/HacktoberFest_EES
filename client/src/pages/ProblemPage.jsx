@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { marked } from 'marked';
 import { api } from '../api.js';
@@ -19,6 +19,8 @@ export default function ProblemPage() {
   const [result, setResult] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [copyStatus, setCopyStatus] = useState('');
+  const copyTimer = useRef(null);
 
   useEffect(() => {
     setProblem(null);
@@ -30,6 +32,24 @@ export default function ProblemPage() {
   useEffect(() => {
     loadSubmissions();
   }, [slug, user]);
+
+  useEffect(() => () => clearTimeout(copyTimer.current), []);
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopyStatus('Copied!');
+    } catch {
+      setCopyStatus('Copy failed');
+    }
+    clearTimeout(copyTimer.current);
+    copyTimer.current = setTimeout(() => setCopyStatus(''), 1500);
+  }
+
+  function resetCode() {
+    if (!window.confirm('Reset to the starter template? Your changes will be lost.')) return;
+    setCode(language.template);
+  }
 
   function loadSubmissions() {
     if (!user) return setSubmissions([]);
@@ -82,6 +102,12 @@ export default function ProblemPage() {
             ))}
           </select>
           <div className="spacer" />
+          <button className="ghost" onClick={copyCode}>
+            {copyStatus || 'Copy'}
+          </button>
+          <button className="ghost" onClick={resetCode}>
+            Reset
+          </button>
           <button className="ghost" disabled title="Not implemented yet">
             Run
           </button>
