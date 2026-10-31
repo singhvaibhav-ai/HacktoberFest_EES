@@ -3,14 +3,21 @@ import { toVerdict } from './verdict.js';
 
 const DEFAULT_TIME_LIMIT_MS = 2000;
 
-function startWorker() {
-  const worker = new Worker('/python-worker.js', { type: 'module' });
+// Each language runs in its own Web Worker.
+const WORKERS = {
+  python: { url: '/python-worker.js', label: 'Python' },
+  javascript: { url: '/javascript-worker.js', label: 'JavaScript' },
+};
+
+function startWorker(language) {
+  const { url, label } = WORKERS[language] ?? WORKERS.python;
+  const worker = new Worker(url, { type: 'module' });
   const ready = new Promise((resolve, reject) => {
     worker.onmessage = (e) => e.data.type === 'ready' && resolve();
-    worker.onerror = (e) => reject(new Error(e.message || 'Could not start Python'));
+    worker.onerror = (e) => reject(new Error(e.message || `Could not start ${label}`));
   });
   worker.postMessage({ type: 'init' });
-  return { worker, ready };
+  return { worker, ready, label };
 }
 
 // Runs one test. Resolves with { type: 'ok' | 'syntax' | 'runtime' | 'timeout', ... }
@@ -32,11 +39,12 @@ function runTest(worker, code, input, timeLimitMs) {
 /**
  * Judges a submission against a problem's tests.
  * onStatus is called with short status messages for the UI.
+ * language is a language id from languages.js ('python' by default).
  * Returns { verdict, passed, total, message }.
  */
-export async function judge(code, problem, onStatus = () => {}) {
-  onStatus('Starting Python...');
-  const { worker, ready } = startWorker();
+export async function judge(code, problem, onStatus = () => {}, language = 'python') {
+  const { worker, ready, label } = startWorker(language);
+  onStatus(`Starting ${label}...`);
   await ready;
 
   const timeLimitMs = problem.timeLimitMs ?? problem.timeLimit ?? DEFAULT_TIME_LIMIT_MS;
