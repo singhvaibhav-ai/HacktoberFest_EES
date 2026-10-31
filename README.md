@@ -2,48 +2,48 @@
 
 # CodeArena
 
-A tiny online judge, like a mini LeetCode, built for **HackDay x Hacktoberfest 2026 at NIT Jamshedpur**, organised by the Electrical Engineering Society.
+एक छोटा ऑनलाइन जज, जैसा कि मिनी लेटकोड, जिसे **NIT Jamshedpur में HackDay x Hacktoberfest 2026** के लिए बनाया गया है, जिसे Electrical Engineering Society द्वारा आयोजित किया जा रहा है।
 
-## The event
+## इवेंट
 
-- **When:** Saturday, 31 October 2026, 9:30 AM to 3:30 PM
-- **Where:** NIT Jamshedpur
-- **Teams:** 3 members (at least one girl in every team)
-- **Prizes:** T-shirts, Arduino boards and goodies for top performers, and a laptop sticker pack for every participant
+- **कब:** शनिवार, 31 अक्टूबर 2026, सुबह 9:30 बजे से दोपहर 3:30 बजे तक
+- **कहाँ:** NIT Jamshedpur
+- **टीम:** 3 सदस्य (हर टीम में कम से कम एक लड़की हो)
+- **पुरस्कार:** शीर्ष प्रदर्शनकर्ताओं के लिए टी-शर्ट, Arduino बोर्ड और गिफ्ट, तथा हर प्रतिभागी के लिए लैपटॉप स्टिकर पैक
 
-**Register in both places to take part:**
+**भाग लेने के लिए दोनों जगह रजिस्टर करें:**
 
-1. [NIT Jamshedpur registration form](https://forms.gle/sGuPKwaUhMbXUrnbA)
-2. [Hacktoberfest Hack Day registration on MLH](https://events.mlh.com/events/14996-hacktoberfest-hack-day-jamshedpur-x-nit-jamshedpur)
+1. [NIT Jamshedpur रजिस्ट्रेशन फॉर्म](https://forms.gle/sGuPKwaUhMbXUrnbA)
+2. [MLH पर Hacktoberfest Hack Day रजिस्ट्रेशन](https://events.mlh.com/events/14996-hacktoberfest-hack-day-jamshedpur-x-nit-jamshedpur)
 
-Pick a problem, write a solution, hit **Submit**, and get a verdict: Accepted, Wrong Answer, Time Limit Exceeded, Runtime Error or Compilation Error.
+कोई समस्या चुनें, उसका समाधान लिखें, **Submit** पर क्लिक करें, और परिणाम प्राप्त करें: Accepted, Wrong Answer, Time Limit Exceeded, Runtime Error या Compilation Error.
 
-It works... mostly. Some verdicts are wrong, the leaderboard page is empty, only Python is supported, and dark mode is half-done. **That's where you come in.** Check the [Issues](../../issues) tab, pick one, and send a pull request.
+यह काम करता है... अधिकांशतः। कुछ परिणाम गलत हैं, लीडरबोर्ड पेज खाली है, केवल Python समर्थित है, और डार्क मोड आधा बना हुआ है। **यही वह जगह है जहाँ आप मदद कर सकते हैं।** [Issues](../../issues) टैब देखें, कोई Issue चुनें, और pull request भेजें।
 
-## How it works
+## यह कैसे काम करता है
 
-Your code never runs on a server. It runs **inside your own browser**:
+आपका कोड कभी भी सर्वर पर नहीं चलता। यह **आपके खुद के ब्राउज़र के अंदर** चलता है:
 
-- Python runs through [Pyodide](https://pyodide.org/), which is Python compiled to WebAssembly.
-- The code runs in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API), so an infinite loop can't freeze the page. When the time limit runs out, the page kills the worker.
-- The page compares your output with the expected output and works out the verdict.
-- The small Express server stores team accounts and submissions, and serves problems and the leaderboard.
-- Like LeetCode, anyone can read problems and write code, but you need a team account to **submit**.
+- Python [Pyodide](https://pyodide.org/) के माध्यम से चलता है, जो WebAssembly के लिए कंपाइल किया गया Python है।
+- कोड [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) में चलता है, इसलिए अनंत लूप पेज को फ्रीज नहीं कर सकता। जब टाइम लिमिट समाप्त होता है, पेज worker को खत्म कर देता है।
+- पेज आपके आउटपुट की तुलना अपेक्षित आउटपुट से करता है और परिणाम निकालता है।
+- छोटा Express सर्वर टीम अकाउंट्स और सबमिशन को संग्रहीत करता है, तथा समस्याएँ और लीडरबोर्ड को सेवा देता है।
+- LeetCode की तरह, कोई भी समस्या पढ़ सकता है और कोड लिख सकता है, लेकिन **submit** करने के लिए आपको टीम अकाउंट की आवश्यकता होती है।
 
 ```
 client/            React + Vite frontend
-  public/python-worker.js   runs Python in a Web Worker
+  public/python-worker.js   Web Worker में Python चलता है
   src/judge/                runner, output comparison, verdicts
   src/pages/                Problem list, problem page, leaderboard, log in / sign up
-  src/auth.jsx              who is logged in (React context)
-server/            Express API (stores data in server/data/db.json)
+  src/auth.jsx              कौन लॉग इन है (React context)
+server/            Express API (server/data/db.json में डेटा संग्रहीत करता है)
   auth.js                   sign up, log in, log out, sessions
-problems/          one folder per problem
+problems/          हर problem के लिए अलग folder
 ```
 
-## Run it locally
+## इसे लोकल मशीन पर चलाएँ
 
-You need [Node.js](https://nodejs.org/) 20 or newer.
+आपको [Node.js](https://nodejs.org/) 20 या नया चाहिए।
 
 ```bash
 git clone https://github.com/<your-username>/HacktoberFest_EES.git
@@ -52,15 +52,15 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173, click **Sign up** to create a team account, and solve **Hello, Arena!**
+http://localhost:5173 खोलें, **Sign up** पर क्लिक करें और टीम अकाउंट बनाएं, फिर **Hello, Arena!** समस्या हल करें
 
-- The frontend runs on port 5173 and the API on port 4000.
-- The first submission takes a few seconds while Python loads in your browser.
+- फ्रंटएंड 5173 पोर्ट पर चलता है और API 4000 पोर्ट पर चलता है।
+- पहली submission में कुछ सेकंड लगते हैं क्योंकि Python आपके ब्राउज़र में लोड हो रहा होता है।
 
-## Contributing
+## योगदान
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before you start. It explains the tags and points, how PRs are judged, how to add a problem and what a good PR looks like. PRs are not merged during the event; each one is judged on its own.
+शुरू करने से पहले [CONTRIBUTING.md](CONTRIBUTING.md) पढ़ें। इसमें tags और points, PRs का मूल्यांकन, किसी problem को जोड़ने की प्रक्रिया, और अच्छी PR कैसी दिखती है, इसकी जानकारी दी गई है। इवेंट के दौरान PRs को merge नहीं किया जाता; हर एक को अलग से जज किया जाता है।
 
-## License
+## लाइसेंस
 
 [MIT](LICENSE)
