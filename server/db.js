@@ -41,5 +41,8 @@ export function addUser({ username, password }) {
 }
 
 export function findUser(username) {
-  return load().users.find((u) => u.username === username);
+  // Team Ohm, team ohm and "Team  Ohm" are the same team, so compare a normalized form.
+  const normalize = (name) => String(name).trim().replace(/\s+/g, ' ').toLowerCase();
+  const wanted = normalize(username);
+  return load().users.find((u) => normalize(u.username) === wanted);
 }
