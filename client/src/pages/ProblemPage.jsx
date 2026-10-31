@@ -92,7 +92,12 @@ export default function ProblemPage() {
 
         <CodeEditor language={language.monaco} value={code} onChange={setCode} />
 
-        {status && <p className="muted">{status}</p>}
+        {status && (
+          <p className="status-line muted" role="status">
+            {busy && <span className="spinner" aria-hidden="true" />}
+            {status}
+          </p>
+        )}
         {result && (
           <div className="verdict">
             <strong>{VERDICT_LABELS[result.verdict] || result.verdict}</strong>
