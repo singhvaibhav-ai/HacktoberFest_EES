@@ -5,6 +5,7 @@
   --muted: #6b6b78;
   --border: #e2e2e8;
   --accent: #6c4cf5;
+  --highlight: #efeaff;
 }
 
 .dark {
@@ -14,6 +15,7 @@
   --muted: #9a9aab;
   --border: #2d2d3a;
   --accent: #9b85ff;
+  --highlight: #2a2440;
 }
 
 * {
@@ -189,6 +191,11 @@ select {
   text-align: left;
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
+}
+
+.table tr.highlight td {
+  background: var(--highlight);
+  font-weight: 600;
 }
 
 .muted {

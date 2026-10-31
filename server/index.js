@@ -43,14 +43,19 @@ app.get('/api/submissions', (req, res) => {
 });
 
 app.get('/api/leaderboard', (req, res) => {
-  const scores = {};
+  const teams = new Map();
   for (const s of listSubmissions()) {
     if (s.verdict !== 'AC') continue;
-    scores[s.username] = (scores[s.username] || 0) + 1;
+    if (!teams.has(s.username)) {
+      teams.set(s.username, { username: s.username, solved: new Set(), lastAccepted: 0 });
+    }
+    const team = teams.get(s.username);
+    team.solved.add(s.slug);
+    team.lastAccepted = Math.max(team.lastAccepted, Date.parse(s.createdAt) || 0);
   }
-  const board = Object.entries(scores)
-    .map(([username, solved]) => ({ username, solved }))
-    .sort((a, b) => b.solved - a.solved);
+  const board = [...teams.values()]
+    .sort((a, b) => b.solved.size - a.solved.size || a.lastAccepted - b.lastAccepted)
+    .map(({ username, solved }) => ({ username, solved: solved.size }));
   res.json(board);
 });
 
