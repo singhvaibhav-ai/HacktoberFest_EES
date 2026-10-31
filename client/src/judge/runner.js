@@ -1,5 +1,5 @@
 import { outputsMatch } from './compare.js';
-import { toVerdict } from './verdict.js';
+import { toVerdict, VERDICT_MESSAGES } from './verdict.js';
 
 const DEFAULT_TIME_LIMIT_MS = 2000;
 
@@ -18,7 +18,7 @@ function runTest(worker, code, input, timeLimitMs) {
   return new Promise((resolve) => {
     const timer = setTimeout(() => {
       worker.terminate();
-      resolve({ type: 'timeout' });
+      resolve({ type: 'timeout', message: `Time limit exceeded (${timeLimitMs}ms).` });
     }, timeLimitMs);
 
     worker.onmessage = (e) => {
@@ -53,7 +53,7 @@ export async function judge(code, problem, onStatus = () => {}) {
     const verdict = toVerdict(result);
     if (verdict !== 'AC') {
       worker.terminate();
-      return { verdict, passed, total: tests.length, message: result.message || '' };
+      return { verdict, passed, total: tests.length, message: result.message || VERDICT_MESSAGES[verdict] || '' };
     }
     passed++;
   }
