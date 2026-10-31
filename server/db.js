@@ -27,9 +27,11 @@ export function addSubmission(submission) {
 }
 
 export function listSubmissions({ slug, username } = {}) {
-  return load().submissions.filter(
-    (s) => (!slug || s.slug === slug) && (!username || s.username === username)
-  );
+  return load()
+    .submissions.filter(
+      (s) => (!slug || s.slug === slug) && (!username || s.username === username)
+    )
+    .sort((a, b) => b.id - a.id);
 }
 
 export function addUser({ username, password }) {
