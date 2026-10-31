@@ -1,12 +1,29 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
+
+// Only allow paths on this site. Anything else (https://evil.example, //evil.example) becomes "/".
+function safeNextPath(next) {
+  if (!next || typeof next !== 'string') return '/';
+  if (!next.startsWith('/') || next.startsWith('//')) return '/';
+  if (/[\\\u0000-\u001f]/.test(next)) return '/';
+  try {
+    const url = new URL(next, window.location.origin);
+    if (url.origin !== window.location.origin) return '/';
+  } catch {
+    return '/';
+  }
+  return next;
+}
 
 // One page for both "Log in" and "Sign up"; mode decides which.
 export default function AuthPage({ mode }) {
   const isSignup = mode === 'signup';
   const { login, signup } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const next = safeNextPath(searchParams.get('next'));
+  const nextQuery = next === '/' ? '' : `?next=${encodeURIComponent(next)}`;
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,7 +36,7 @@ export default function AuthPage({ mode }) {
     try {
       if (isSignup) await signup(username, password);
       else await login(username, password);
-      navigate('/');
+      navigate(next, { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -53,11 +70,11 @@ export default function AuthPage({ mode }) {
       <p className="muted">
         {isSignup ? (
           <>
-            Already have an account? <Link to="/login">Log in</Link>
+            Already have an account? <Link to={`/login${nextQuery}`}>Log in</Link>
           </>
         ) : (
           <>
-            New here? <Link to="/signup">Create a team account</Link>
+            New here? <Link to={`/signup${nextQuery}`}>Create a team account</Link>
           </>
         )}
       </p>
