@@ -15,3 +15,4 @@ code += '\nexport default fengari;\nexport const { lua, lauxlib, lualib, to_luas
 
 fs.writeFileSync(dest, code);
 console.log(`Prepared Fengari at ${path.relative(process.cwd(), dest)}`);
+
