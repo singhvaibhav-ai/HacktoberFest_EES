@@ -1,13 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 
 export default function Navbar() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(() => {
+    return localStorage.getItem('codearena_theme') === 'dark';
+  });
   const { user, checking, logout } = useAuth();
 
+  useEffect(() => {
+    if (dark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('codearena_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('codearena_theme', 'light');
+    }
+  }, [dark]);
+
   return (
-    <nav className={`navbar ${dark ? 'dark' : ''}`}>
+    <nav className="navbar">
       <Link to="/" className="brand">
         Code<span>Arena</span>
       </Link>
@@ -29,7 +41,7 @@ export default function Navbar() {
           </Link>
         </>
       )}
-      <button className="ghost" onClick={() => setDark(!dark)} title="Toggle dark mode">
+      <button className="ghost" onClick={() => setDark((prev) => !prev)} title="Toggle dark mode">
         {dark ? '☀️' : '🌙'}
       </button>
     </nav>
