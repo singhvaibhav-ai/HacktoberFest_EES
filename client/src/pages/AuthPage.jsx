@@ -9,6 +9,7 @@ export default function AuthPage({ mode }) {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -36,15 +37,26 @@ export default function AuthPage({ mode }) {
           Team name
           <input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" />
         </label>
-        <label>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete={isSignup ? 'new-password' : 'current-password'}
-          />
-        </label>
+        <div className="field">
+          <label htmlFor="password">Password</label>
+          <div className="password-field">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={isSignup ? 'new-password' : 'current-password'}
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((shown) => !shown)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
+        </div>
         {error && <p className="error">{error}</p>}
         <button type="submit" disabled={busy}>
           {busy ? 'Please wait...' : isSignup ? 'Sign up' : 'Log in'}
