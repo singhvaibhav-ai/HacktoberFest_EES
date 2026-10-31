@@ -9,12 +9,27 @@ export default function AuthPage({ mode }) {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    if (isSignup) {
+      if (username.trim().length < 3 || username.trim().length > 30) {
+        setError('Team name must be between 3 and 30 characters');
+        return;
+      }
+      if (password.length < 8) {
+        setError('Password must be at least 8 characters');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+    }
     setBusy(true);
     try {
       if (isSignup) await signup(username, password);
@@ -34,7 +49,13 @@ export default function AuthPage({ mode }) {
       <form onSubmit={handleSubmit}>
         <label>
           Team name
-          <input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" />
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoComplete="username"
+            minLength={isSignup ? 3 : undefined}
+            maxLength={isSignup ? 30 : undefined}
+          />
         </label>
         <label>
           Password
@@ -45,6 +66,18 @@ export default function AuthPage({ mode }) {
             autoComplete={isSignup ? 'new-password' : 'current-password'}
           />
         </label>
+        {isSignup && (
+          <label>
+            Confirm password
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+              minLength={8}
+            />
+          </label>
+        )}
         {error && <p className="error">{error}</p>}
         <button type="submit" disabled={busy}>
           {busy ? 'Please wait...' : isSignup ? 'Sign up' : 'Log in'}

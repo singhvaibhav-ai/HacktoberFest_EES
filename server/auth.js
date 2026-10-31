@@ -38,8 +38,11 @@ export function authRoutes(app) {
   app.post('/api/auth/signup', (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Team name and password are required' });
+    if (username.length < 3 || username.length > 30) {
+      return res.status(400).json({ error: 'Team name must be between 3 and 30 characters' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
     if (findUser(username)) {
       return res.status(409).json({ error: 'That team name is taken' });
