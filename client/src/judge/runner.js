@@ -39,7 +39,7 @@ export async function judge(code, problem, onStatus = () => {}) {
   const { worker, ready } = startWorker();
   await ready;
 
-  const timeLimitMs = problem.timeLimitMs ?? problem.timeLimit ?? DEFAULT_TIME_LIMIT_MS;
+  const timeLimitMs = problem.timeLimitMs ?? (problem.timeLimit ? problem.timeLimit * 1000 : DEFAULT_TIME_LIMIT_MS);
   const tests = problem.tests.slice(0, 1);
   let passed = 0;
 
