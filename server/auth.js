@@ -4,7 +4,8 @@ import crypto from 'node:crypto';
 import { addUser, findUser } from './db.js';
 
 const COOKIE = 'codearena_session';
-const sessions = new Map(); // token -> username
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const sessions = new Map(); // token -> { username, expiresAt }
 
 function readCookie(req, name) {
   const header = req.headers.cookie || '';
@@ -17,15 +18,33 @@ function readCookie(req, name) {
 
 function startSession(res, username) {
   const token = crypto.randomBytes(24).toString('hex');
-  sessions.set(token, username);
-  res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 });
+  sessions.set(token, { username, expiresAt: Date.now() + SESSION_TTL_MS });
+  res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: SESSION_TTL_MS });
 }
+
+// Returns the session if it exists and has not expired on the server.
+function findSession(token) {
+  const session = token && sessions.get(token);
+  if (!session) return null;
+  if (session.expiresAt <= Date.now()) {
+    sessions.delete(token);
+    return null;
+  }
+  return session;
+}
+
+// Remove expired sessions every hour so the map does not grow forever.
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, session] of sessions) {
+    if (session.expiresAt <= now) sessions.delete(token);
+  }
+}, 60 * 60 * 1000).unref();
 
 // Puts the logged-in team (if any) on req.user.
 export function currentUser(req, res, next) {
-  const token = readCookie(req, COOKIE);
-  const username = token && sessions.get(token);
-  req.user = username ? { username } : null;
+  const session = findSession(readCookie(req, COOKIE));
+  req.user = session ? { username: session.username } : null;
   next();
 }
 
@@ -64,6 +83,8 @@ export function authRoutes(app) {
   });
 
   app.post('/api/auth/logout', (req, res) => {
+    const token = readCookie(req, COOKIE);
+    if (token) sessions.delete(token); // kill the session on the server
     res.clearCookie(COOKIE);
     res.json({ ok: true });
   });
