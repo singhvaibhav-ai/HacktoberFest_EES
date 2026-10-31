@@ -36,28 +36,41 @@ function runTest(worker, code, input, timeLimitMs) {
  */
 export async function judge(code, problem, onStatus = () => {}) {
   onStatus('Starting Python...');
-  const { worker, ready } = startWorker();
-  await ready;
-
   const timeLimitMs = problem.timeLimitMs ?? problem.timeLimit ?? DEFAULT_TIME_LIMIT_MS;
-  const tests = problem.tests.slice(0, 1);
+  const tests = problem.tests;
   let passed = 0;
+  let verdict = 'AC';
+  let message = '';
+  let worker;
 
-  for (let i = 0; i < tests.length; i++) {
-    onStatus(`Running test ${i + 1}...`);
-    const result = await runTest(worker, code, tests[i].input, timeLimitMs);
+  try {
+    let ready;
+    ({ worker, ready } = startWorker());
+    await ready;
 
-    if (result.type === 'ok') {
-      result.passed = outputsMatch(result.stdout, tests[i].output);
+    for (let i = 0; i < tests.length; i++) {
+      onStatus(`Running test ${i + 1}...`);
+      const result = await runTest(worker, code, tests[i].input, timeLimitMs);
+
+      if (result.type === 'ok') {
+        result.passed = outputsMatch(result.stdout, tests[i].output);
+      }
+      const testVerdict = toVerdict(result);
+      if (testVerdict === 'AC') {
+        passed++;
+      } else if (verdict === 'AC') {
+        verdict = testVerdict;
+        message = result.message || '';
+      }
+
+      if (result.type === 'timeout' && i < tests.length - 1) {
+        ({ worker, ready } = startWorker());
+        await ready;
+      }
     }
-    const verdict = toVerdict(result);
-    if (verdict !== 'AC') {
-      worker.terminate();
-      return { verdict, passed, total: tests.length, message: result.message || '' };
-    }
-    passed++;
+  } finally {
+    worker?.terminate();
   }
 
-  worker.terminate();
-  return { verdict: 'AC', passed, total: tests.length, message: '' };
+  return { verdict, passed, total: tests.length, message };
 }
