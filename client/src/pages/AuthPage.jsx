@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 
@@ -11,6 +11,24 @@ export default function AuthPage({ mode }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [retryAfter, setRetryAfter] = useState(null);
+
+  useEffect(() => {
+    if (!retryAfter || retryAfter <= 0) return;
+    const interval = setInterval(() => {
+      setRetryAfter((prev) => {
+        if (!prev || prev <= 1) {
+          setError('');
+          return null;
+        }
+        const next = prev - 1;
+        const minutes = Math.max(1, Math.ceil(next / 60));
+        setError(`Too many attempts, try again in ${minutes} minute${minutes === 1 ? '' : 's'}`);
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [retryAfter]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -19,9 +37,13 @@ export default function AuthPage({ mode }) {
     try {
       if (isSignup) await signup(username, password);
       else await login(username, password);
+      setRetryAfter(null);
       navigate('/');
     } catch (err) {
       setError(err.message);
+      if (err.status === 429 && err.retryAfter) {
+        setRetryAfter(err.retryAfter);
+      }
     } finally {
       setBusy(false);
     }
