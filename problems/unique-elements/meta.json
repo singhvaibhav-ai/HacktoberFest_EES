@@ -1,0 +1,8 @@
+{
+  "title": "Unique Elements",
+  "difficulty": "Easy",
+  "tags": ["arrays", "hash-table"],
+  "order": 7,
+  "timeLimitMs": 2000,
+  "checker": "unordered-lines"
+}
