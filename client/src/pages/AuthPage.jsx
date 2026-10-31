@@ -21,7 +21,7 @@ export default function AuthPage({ mode }) {
       else await login(username, password);
       navigate('/');
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setBusy(false);
     }
