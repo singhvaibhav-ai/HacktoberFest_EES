@@ -9,12 +9,25 @@ export default function AuthPage({ mode }) {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    if (isSignup) {
+      const name = username.trim();
+      if (name.length < 3 || name.length > 30) {
+        return setError('Team name must be between 3 and 30 characters.');
+      }
+      if (password.length < 8) {
+        return setError('Password must be at least 8 characters.');
+      }
+      if (password !== confirmPassword) {
+        return setError('Passwords do not match.');
+      }
+    }
     setBusy(true);
     try {
       if (isSignup) await signup(username, password);
@@ -45,6 +58,17 @@ export default function AuthPage({ mode }) {
             autoComplete={isSignup ? 'new-password' : 'current-password'}
           />
         </label>
+        {isSignup && (
+          <label>
+            Confirm password
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+            />
+          </label>
+        )}
         {error && <p className="error">{error}</p>}
         <button type="submit" disabled={busy}>
           {busy ? 'Please wait...' : isSignup ? 'Sign up' : 'Log in'}
