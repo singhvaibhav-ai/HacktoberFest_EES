@@ -3,7 +3,16 @@ async function request(path, options) {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    try {
+      const data = await res.json();
+      if (data && data.error) message = data.error;
+    } catch {
+      // response had no JSON body, keep the default message
+    }
+    throw new Error(message);
+  }
   return res.json();
 }
 

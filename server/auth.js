@@ -6,6 +6,10 @@ import { addUser, findUser } from './db.js';
 const COOKIE = 'codearena_session';
 const sessions = new Map(); // token -> username
 
+const USERNAME_MIN = 3;
+const USERNAME_MAX = 30;
+const PASSWORD_MIN = 8;
+
 function readCookie(req, name) {
   const header = req.headers.cookie || '';
   for (const part of header.split(';')) {
@@ -40,6 +44,17 @@ export function authRoutes(app) {
     const password = String(req.body.password || '');
     if (!username || !password) {
       return res.status(400).json({ error: 'Team name and password are required' });
+    }
+    // The browser checks these too, but the browser can be bypassed, so the server must check.
+    if (username.length < USERNAME_MIN || username.length > USERNAME_MAX) {
+      return res
+        .status(400)
+        .json({ error: `Team name must be ${USERNAME_MIN} to ${USERNAME_MAX} characters` });
+    }
+    if (password.length < PASSWORD_MIN) {
+      return res
+        .status(400)
+        .json({ error: `Password must be at least ${PASSWORD_MIN} characters` });
     }
     if (findUser(username)) {
       return res.status(409).json({ error: 'That team name is taken' });
