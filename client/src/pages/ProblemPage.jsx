@@ -7,12 +7,15 @@ import { VERDICT_LABELS } from '../judge/verdict.js';
 import { LANGUAGES } from '../languages.js';
 import { useAuth } from '../auth.jsx';
 import CodeEditor from '../components/CodeEditor.jsx';
+import NotFound from './NotFound.jsx';
 
 export default function ProblemPage() {
   const { slug } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [problem, setProblem] = useState(null);
+  const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const [language, setLanguage] = useState(LANGUAGES[0]);
   const [code, setCode] = useState(LANGUAGES[0].template);
   const [status, setStatus] = useState('');
@@ -22,9 +25,17 @@ export default function ProblemPage() {
 
   useEffect(() => {
     setProblem(null);
+    setNotFound(false);
+    setLoadError('');
     setResult(null);
     setCode(language.template);
-    api.problem(slug).then(setProblem);
+    api
+      .problem(slug)
+      .then(setProblem)
+      .catch((err) => {
+        if (err.status === 404) setNotFound(true);
+        else setLoadError('Could not load this problem. Is the server running?');
+      });
   }, [slug]);
 
   useEffect(() => {
@@ -57,6 +68,10 @@ export default function ProblemPage() {
     }
   }
 
+  if (notFound) {
+    return <NotFound message="This problem doesn't exist. It may have been removed, or the link may be wrong." />;
+  }
+  if (loadError) return <p className="error">{loadError}</p>;
   if (!problem) return <p className="muted">Loading...</p>;
 
   return (

@@ -161,6 +161,33 @@ select {
   color: #d33;
 }
 
+.not-found {
+  max-width: 480px;
+  margin: 64px auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+}
+
+.not-found h1 {
+  margin: 0 0 8px;
+}
+
+.not-found .not-found-code {
+  margin: 0;
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.not-found .button {
+  display: inline-block;
+  margin-top: 16px;
+}
+
 .problem-layout {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
