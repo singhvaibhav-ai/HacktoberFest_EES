@@ -8,6 +8,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
+function normalizeUsername(username) {
+  return String(username ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
 function load() {
   if (!fs.existsSync(DB_FILE)) return { users: [], submissions: [] };
   return { users: [], submissions: [], ...JSON.parse(fs.readFileSync(DB_FILE, 'utf8')) };
@@ -41,5 +45,6 @@ export function addUser({ username, password }) {
 }
 
 export function findUser(username) {
-  return load().users.find((u) => u.username === username);
+  const normalizedUsername = normalizeUsername(username);
+  return load().users.find((u) => normalizeUsername(u.username) === normalizedUsername);
 }
