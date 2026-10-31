@@ -3,5 +3,5 @@
   "difficulty": "Medium",
   "tags": ["arrays", "math"],
   "order": 4,
-  "timeLimit": 1
+  "timeLimitMs": 2000
 }
