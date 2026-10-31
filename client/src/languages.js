@@ -1,5 +1,5 @@
 // Languages shown in the editor's dropdown.
-// Only Python can actually run right now; the others are waiting for someone to add them!
+// Only enabled languages can be selected and run in the judge.
 export const LANGUAGES = [
   {
     id: 'python',
@@ -10,5 +10,11 @@ export const LANGUAGES = [
   },
   { id: 'javascript', label: 'JavaScript (coming soon)', monaco: 'javascript', enabled: false, template: '' },
   { id: 'lua', label: 'Lua (coming soon)', monaco: 'lua', enabled: false, template: '' },
-  { id: 'ruby', label: 'Ruby (coming soon)', monaco: 'ruby', enabled: false, template: '' },
+  {
+    id: 'ruby',
+    label: 'Ruby',
+    monaco: 'ruby',
+    enabled: true,
+    template: '# Read input with gets, print your answer with puts or print\n\n',
+  },
 ];

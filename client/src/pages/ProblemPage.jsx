@@ -45,7 +45,7 @@ export default function ProblemPage() {
     setBusy(true);
     setResult(null);
     try {
-      const res = await judge(code, problem, setStatus);
+      const res = await judge(code, problem, setStatus, language.id);
       setResult(res);
       await api.submit({ username: user.username, slug, language: language.id, code, ...res });
       loadSubmissions();
@@ -73,7 +73,13 @@ export default function ProblemPage() {
         <div className="toolbar">
           <select
             value={language.id}
-            onChange={(e) => setLanguage(LANGUAGES.find((l) => l.id === e.target.value))}
+            onChange={(e) => {
+              const next = LANGUAGES.find((l) => l.id === e.target.value);
+              if (next) {
+                if (!code || code === language.template) setCode(next.template);
+                setLanguage(next);
+              }
+            }}
           >
             {LANGUAGES.map((l) => (
               <option key={l.id} value={l.id} disabled={!l.enabled}>
