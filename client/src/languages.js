@@ -9,6 +9,12 @@ export const LANGUAGES = [
     template: '# Read input with input(), print your answer with print()\n\n',
   },
   { id: 'javascript', label: 'JavaScript (coming soon)', monaco: 'javascript', enabled: false, template: '' },
-  { id: 'lua', label: 'Lua (coming soon)', monaco: 'lua', enabled: false, template: '' },
+  {
+    id: 'lua',
+    label: 'Lua',
+    monaco: 'lua',
+    enabled: true,
+    template: '-- Read input with io.read(), print your answer with print()\n\n',
+  },
   { id: 'ruby', label: 'Ruby (coming soon)', monaco: 'ruby', enabled: false, template: '' },
 ];
