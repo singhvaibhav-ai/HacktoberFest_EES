@@ -36,7 +36,7 @@ export function requireLogin(req, res, next) {
 
 export function authRoutes(app) {
   app.post('/api/auth/signup', (req, res) => {
-    const username = String(req.body.username || '').trim();
+    const username = String(req.body.username || '').trim().replace(/\s+/g, ' ');
     const password = String(req.body.password || '');
     if (!username || !password) {
       return res.status(400).json({ error: 'Team name and password are required' });
@@ -50,7 +50,7 @@ export function authRoutes(app) {
   });
 
   app.post('/api/auth/login', (req, res) => {
-    const username = String(req.body.username || '').trim();
+    const username = String(req.body.username || '').trim().replace(/\s+/g, ' ');
     const password = String(req.body.password || '');
     const user = findUser(username);
     if (!user) {
