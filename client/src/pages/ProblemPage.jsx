@@ -36,6 +36,13 @@ export default function ProblemPage() {
     api.submissions(slug, user.username).then(setSubmissions);
   }
 
+  function changeLanguage(id) {
+    const next = LANGUAGES.find((l) => l.id === id);
+    // Show the new language's starter code, unless the user has already written something.
+    if (code.trim() === '' || code === language.template) setCode(next.template);
+    setLanguage(next);
+  }
+
   async function submit() {
     // Like LeetCode: anyone can read and write code, but submitting needs an account.
     if (!user) {
@@ -45,7 +52,7 @@ export default function ProblemPage() {
     setBusy(true);
     setResult(null);
     try {
-      const res = await judge(code, problem, setStatus);
+      const res = await judge(code, problem, language, setStatus);
       setResult(res);
       await api.submit({ username: user.username, slug, language: language.id, code, ...res });
       loadSubmissions();
@@ -71,10 +78,7 @@ export default function ProblemPage() {
 
       <section className="workspace">
         <div className="toolbar">
-          <select
-            value={language.id}
-            onChange={(e) => setLanguage(LANGUAGES.find((l) => l.id === e.target.value))}
-          >
+          <select value={language.id} onChange={(e) => changeLanguage(e.target.value)}>
             {LANGUAGES.map((l) => (
               <option key={l.id} value={l.id} disabled={!l.enabled}>
                 {l.label}
