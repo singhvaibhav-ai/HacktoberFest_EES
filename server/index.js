@@ -7,7 +7,7 @@ import { authRoutes, currentUser, requireLogin } from './auth.js';
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+app.use(cors({ exposedHeaders: ['Retry-After'] }));
 app.use(express.json());
 app.use(currentUser);
 

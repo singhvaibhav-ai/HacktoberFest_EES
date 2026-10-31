@@ -5,6 +5,46 @@ import { addUser, findUser } from './db.js';
 
 const COOKIE = 'codearena_session';
 const sessions = new Map(); // token -> username
+const LOGIN_WINDOW_MS = 10 * 60 * 1000;
+const MAX_FAILED_LOGINS = 5;
+const failedLogins = new Map(); // key -> timestamps of failed login attempts
+
+function loginKeys(req, username) {
+  return [`team:${username.toLowerCase()}`, `ip:${req.ip || req.socket.remoteAddress || 'unknown'}`];
+}
+
+function pruneFailedLogins(now = Date.now()) {
+  for (const [key, attempts] of failedLogins) {
+    const recent = attempts.filter((time) => now - time < LOGIN_WINDOW_MS);
+    if (recent.length) failedLogins.set(key, recent);
+    else failedLogins.delete(key);
+  }
+}
+
+function retryAfterSeconds(keys, now = Date.now()) {
+  pruneFailedLogins(now);
+  const latestBlockingAttempt = keys
+    .map((key) => failedLogins.get(key) || [])
+    .filter((attempts) => attempts.length >= MAX_FAILED_LOGINS)
+    .map((attempts) => attempts[0])
+    .reduce((latest, time) => Math.max(latest, time), 0);
+
+  if (!latestBlockingAttempt) return 0;
+  return Math.max(1, Math.ceil((latestBlockingAttempt + LOGIN_WINDOW_MS - now) / 1000));
+}
+
+function recordFailedLogin(keys, now = Date.now()) {
+  pruneFailedLogins(now);
+  for (const key of keys) {
+    const attempts = failedLogins.get(key) || [];
+    attempts.push(now);
+    failedLogins.set(key, attempts);
+  }
+}
+
+function clearFailedLogins(keys) {
+  for (const key of keys) failedLogins.delete(key);
+}
 
 function readCookie(req, name) {
   const header = req.headers.cookie || '';
@@ -52,13 +92,23 @@ export function authRoutes(app) {
   app.post('/api/auth/login', (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
+    const keys = loginKeys(req, username);
+    const retryAfter = retryAfterSeconds(keys);
+    if (retryAfter) {
+      res.set('Retry-After', String(retryAfter));
+      return res.status(429).json({ error: 'Too many login attempts. Please try again later.' });
+    }
+
     const user = findUser(username);
     if (!user) {
+      recordFailedLogin(keys);
       return res.status(401).json({ error: 'No team with that name' });
     }
     if (user.password !== password) {
+      recordFailedLogin(keys);
       return res.status(401).json({ error: 'Wrong password' });
     }
+    clearFailedLogins(keys);
     startSession(res, user.username);
     res.json({ username: user.username });
   });
