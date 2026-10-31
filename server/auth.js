@@ -2,6 +2,7 @@
 // Sessions live in memory, so everyone has to log in again after the server restarts.
 import crypto from 'node:crypto';
 import { addUser, findUser } from './db.js';
+import { hashPassword, verifyPassword } from './passwords.js';
 
 const COOKIE = 'codearena_session';
 const sessions = new Map(); // token -> username
@@ -21,6 +22,10 @@ function startSession(res, username) {
   res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 });
 }
 
+function asyncRoute(handler) {
+  return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
+}
+
 // Puts the logged-in team (if any) on req.user.
 export function currentUser(req, res, next) {
   const token = readCookie(req, COOKIE);
@@ -35,7 +40,7 @@ export function requireLogin(req, res, next) {
 }
 
 export function authRoutes(app) {
-  app.post('/api/auth/signup', (req, res) => {
+  app.post('/api/auth/signup', asyncRoute(async (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
     if (!username || !password) {
@@ -44,24 +49,25 @@ export function authRoutes(app) {
     if (findUser(username)) {
       return res.status(409).json({ error: 'That team name is taken' });
     }
-    addUser({ username, password });
+    const passwordHash = await hashPassword(password);
+    addUser({ username, passwordHash });
     startSession(res, username);
     res.status(201).json({ username });
-  });
+  }));
 
-  app.post('/api/auth/login', (req, res) => {
+  app.post('/api/auth/login', asyncRoute(async (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
     const user = findUser(username);
     if (!user) {
       return res.status(401).json({ error: 'No team with that name' });
     }
-    if (user.password !== password) {
+    if (!(await verifyPassword(password, user.passwordHash))) {
       return res.status(401).json({ error: 'Wrong password' });
     }
     startSession(res, user.username);
     res.json({ username: user.username });
-  });
+  }));
 
   app.post('/api/auth/logout', (req, res) => {
     res.clearCookie(COOKIE);
