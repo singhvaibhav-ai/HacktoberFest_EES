@@ -124,6 +124,25 @@ a.button {
   font-size: 14px;
 }
 
+.password-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.password-field input {
+  flex: 1;
+}
+
+.toggle-password {
+  min-width: 72px;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+
 button.ghost {
   background: transparent;
   color: var(--text);
