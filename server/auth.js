@@ -53,11 +53,11 @@ export function authRoutes(app) {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
     const user = findUser(username);
-    if (!user) {
-      return res.status(401).json({ error: 'No team with that name' });
-    }
-    if (user.password !== password) {
-      return res.status(401).json({ error: 'Wrong password' });
+    // Use the same error message for both nonexistent teams and wrong passwords
+    // to prevent username enumeration attacks.
+    const wrongCredentials = !user || user.password !== password;
+    if (wrongCredentials) {
+      return res.status(401).json({ error: 'Wrong team name or password' });
     }
     startSession(res, user.username);
     res.json({ username: user.username });
