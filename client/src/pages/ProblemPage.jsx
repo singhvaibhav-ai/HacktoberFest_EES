@@ -7,6 +7,7 @@ import { VERDICT_LABELS } from '../judge/verdict.js';
 import { LANGUAGES } from '../languages.js';
 import { useAuth } from '../auth.jsx';
 import CodeEditor from '../components/CodeEditor.jsx';
+import DifficultyBadge from '../components/DifficultyBadge.jsx';
 
 export default function ProblemPage() {
   const { slug } = useParams();
@@ -64,7 +65,8 @@ export default function ProblemPage() {
       <section className="statement">
         <h1>{problem.title}</h1>
         <p className="muted">
-          {problem.difficulty} · {problem.tags?.join(', ')}
+          <DifficultyBadge difficulty={problem.difficulty} />
+          {problem.tags?.length ? <> · {problem.tags.join(', ')}</> : null}
         </p>
         <div dangerouslySetInnerHTML={{ __html: marked.parse(problem.statement) }} />
       </section>
