@@ -8,6 +8,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --bg: #121218;
   --surface: #1c1c25;
   --text: #ececf1;

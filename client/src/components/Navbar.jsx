@@ -1,13 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 
+const THEME_KEY = 'theme';
+
+function getInitialDark() {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved) return saved === 'dark';
+  } catch {
+    // localStorage can be unavailable (e.g. private mode); fall through.
+  }
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+}
+
 export default function Navbar() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(getInitialDark);
   const { user, checking, logout } = useAuth();
 
+  // Put the class on <html> so the theme variables apply to the whole page.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle('dark', dark);
+    try {
+      localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+    } catch {
+      // Ignore storage failures; the theme still applies for this session.
+    }
+  }, [dark]);
+
   return (
-    <nav className={`navbar ${dark ? 'dark' : ''}`}>
+    <nav className="navbar">
       <Link to="/" className="brand">
         Code<span>Arena</span>
       </Link>
@@ -29,7 +52,13 @@ export default function Navbar() {
           </Link>
         </>
       )}
-      <button className="ghost" onClick={() => setDark(!dark)} title="Toggle dark mode">
+      <button
+        className="ghost"
+        onClick={() => setDark((value) => !value)}
+        title="Toggle dark mode"
+        aria-label="Toggle dark mode"
+        aria-pressed={dark}
+      >
         {dark ? '☀️' : '🌙'}
       </button>
     </nav>
