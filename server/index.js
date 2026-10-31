@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { listProblems, getProblem } from './problems.js';
-import { addSubmission, listSubmissions } from './db.js';
+import { addSubmission, listSubmissions, migrateLegacyPasswords } from './db.js';
 import { authRoutes, currentUser, requireLogin } from './auth.js';
 
 const app = express();
@@ -53,6 +53,8 @@ app.get('/api/leaderboard', (req, res) => {
     .sort((a, b) => b.solved - a.solved);
   res.json(board);
 });
+
+await migrateLegacyPasswords();
 
 app.listen(PORT, () => {
   console.log(`CodeArena API running on http://localhost:${PORT}`);

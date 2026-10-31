@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { hashPassword } from './passwords.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, 'data');
@@ -32,9 +33,9 @@ export function listSubmissions({ slug, username } = {}) {
   );
 }
 
-export function addUser({ username, password }) {
+export function addUser({ username, passwordHash }) {
   const db = load();
-  const user = { id: db.users.length + 1, createdAt: new Date().toISOString(), username, password };
+  const user = { id: db.users.length + 1, createdAt: new Date().toISOString(), username, passwordHash };
   db.users.push(user);
   save(db);
   return user;
@@ -42,4 +43,22 @@ export function addUser({ username, password }) {
 
 export function findUser(username) {
   return load().users.find((u) => u.username === username);
+}
+
+// Upgrade accounts created before password hashing was added, preserving their logins.
+export async function migrateLegacyPasswords() {
+  const db = load();
+  let changed = false;
+
+  for (const user of db.users) {
+    if (Object.hasOwn(user, 'password')) {
+      if (!user.passwordHash && typeof user.password === 'string') {
+        user.passwordHash = await hashPassword(user.password);
+      }
+      delete user.password;
+      changed = true;
+    }
+  }
+
+  if (changed) save(db);
 }
