@@ -45,7 +45,7 @@ export default function ProblemPage() {
     setBusy(true);
     setResult(null);
     try {
-      const res = await judge(code, problem, setStatus);
+      const res = await judge(code, language.id, problem, setStatus);
       setResult(res);
       await api.submit({ username: user.username, slug, language: language.id, code, ...res });
       loadSubmissions();
