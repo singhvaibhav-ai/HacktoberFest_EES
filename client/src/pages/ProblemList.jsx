@@ -4,11 +4,35 @@ import { api } from '../api.js';
 
 export default function ProblemList() {
   const [problems, setProblems] = useState([]);
+  const [contest, setContest] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.problems().then(setProblems).catch(() => setError('Could not reach the server. Is it running?'));
+    api.contest().then(setContest).catch(() => {});
+    api.problems()
+      .then(setProblems)
+      .catch((err) => {
+        if (err.status !== 403) {
+          setError('Could not reach the server. Is it running?');
+        }
+      });
   }, []);
+
+  const isUpcoming = contest?.enabled && contest?.status === 'upcoming';
+
+  if (isUpcoming) {
+    return (
+      <section className="contest-banner-card">
+        <h1>Contest Mode</h1>
+        <p className="muted">
+          The contest has not started yet. All problem statements and test cases are hidden until the contest begins.
+        </p>
+        <div className="contest-meta-box">
+          <strong>Contest Starts:</strong> {new Date(contest.start).toLocaleString()}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section>
