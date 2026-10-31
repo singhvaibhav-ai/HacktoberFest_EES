@@ -1,10 +1,23 @@
 async function request(path, options) {
-  const res = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-  return res.json();
+  let res;
+  try {
+    res = await fetch(path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options,
+    });
+  } catch {
+    throw new Error('Unable to connect to the server. Please try again.');
+  }
+
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    if (!res.ok) throw new Error('Something went wrong. Please try again.');
+    throw new Error('The server returned an invalid response. Please try again.');
+  }
+  if (!res.ok) throw new Error(data?.error || 'Something went wrong. Please try again.');
+  return data;
 }
 
 export const api = {
