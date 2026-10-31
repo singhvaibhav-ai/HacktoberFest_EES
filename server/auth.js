@@ -4,7 +4,8 @@ import crypto from 'node:crypto';
 import { addUser, findUser } from './db.js';
 
 const COOKIE = 'codearena_session';
-const sessions = new Map(); // token -> username
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const sessions = new Map(); // token -> { username, expiresAt }
 
 function readCookie(req, name) {
   const header = req.headers.cookie || '';
@@ -17,15 +18,21 @@ function readCookie(req, name) {
 
 function startSession(res, username) {
   const token = crypto.randomBytes(24).toString('hex');
-  sessions.set(token, username);
-  res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 });
+  sessions.set(token, { username, expiresAt: Date.now() + SESSION_TTL_MS });
+  res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: SESSION_TTL_MS });
 }
 
 // Puts the logged-in team (if any) on req.user.
+// Expiry is enforced on the server, so a copied cookie stops working after 24h.
 export function currentUser(req, res, next) {
   const token = readCookie(req, COOKIE);
-  const username = token && sessions.get(token);
-  req.user = username ? { username } : null;
+  const session = token && sessions.get(token);
+  if (session && Date.now() > session.expiresAt) {
+    sessions.delete(token);
+    req.user = null;
+    return next();
+  }
+  req.user = session ? { username: session.username } : null;
   next();
 }
 
@@ -64,6 +71,9 @@ export function authRoutes(app) {
   });
 
   app.post('/api/auth/logout', (req, res) => {
+    // Delete the session on the server so a copied cookie stops working.
+    const token = readCookie(req, COOKIE);
+    if (token) sessions.delete(token);
     res.clearCookie(COOKIE);
     res.json({ ok: true });
   });
