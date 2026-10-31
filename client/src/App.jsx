@@ -19,6 +19,17 @@ export default function App() {
           <Route path="/signup" element={<AuthPage mode="signup" />} />
         </Routes>
       </main>
+      <footer className="footer">
+        <p>Built at Hacktoberfest Hack Day 2026 · EES, NIT Jamshedpur</p>
+        <span>·</span>
+        <a
+          href="https://github.com/singhvaibhav-ai/HacktoberFest_EES"
+          target="_blank"
+          rel="noreferrer"
+        >
+          GitHub repository
+        </a>
+      </footer>
     </AuthProvider>
   );
 }
