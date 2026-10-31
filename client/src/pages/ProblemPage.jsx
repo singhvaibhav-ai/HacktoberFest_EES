@@ -8,13 +8,24 @@ import { LANGUAGES } from '../languages.js';
 import { useAuth } from '../auth.jsx';
 import CodeEditor from '../components/CodeEditor.jsx';
 
+function storageKey(slug, languageId) {
+  return `codearena:${slug}:${languageId}`;
+}
+
 export default function ProblemPage() {
   const { slug } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [problem, setProblem] = useState(null);
   const [language, setLanguage] = useState(LANGUAGES[0]);
-  const [code, setCode] = useState(LANGUAGES[0].template);
+  const [code, setCode] = useState(() => {
+    try {
+      const saved = slug ? localStorage.getItem(storageKey(slug, LANGUAGES[0].id)) : null;
+      return saved !== null ? saved : LANGUAGES[0].template;
+    } catch {
+      return LANGUAGES[0].template;
+    }
+  });
   const [status, setStatus] = useState('');
   const [result, setResult] = useState(null);
   const [submissions, setSubmissions] = useState([]);
@@ -23,9 +34,26 @@ export default function ProblemPage() {
   useEffect(() => {
     setProblem(null);
     setResult(null);
-    setCode(language.template);
     api.problem(slug).then(setProblem);
   }, [slug]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey(slug, language.id));
+      setCode(saved !== null ? saved : language.template);
+    } catch {
+      setCode(language.template);
+    }
+  }, [slug, language.id]);
+
+  function handleCodeChange(newCode) {
+    setCode(newCode);
+    try {
+      if (slug && language) {
+        localStorage.setItem(storageKey(slug, language.id), newCode);
+      }
+    } catch {}
+  }
 
   useEffect(() => {
     loadSubmissions();
@@ -90,7 +118,7 @@ export default function ProblemPage() {
           </button>
         </div>
 
-        <CodeEditor language={language.monaco} value={code} onChange={setCode} />
+        <CodeEditor language={language.monaco} value={code} onChange={handleCodeChange} />
 
         {status && <p className="muted">{status}</p>}
         {result && (
