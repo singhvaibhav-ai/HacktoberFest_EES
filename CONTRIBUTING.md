@@ -11,7 +11,7 @@ Welcome, HackDay x Hacktoberfest 2026 participant! (Not registered yet? See [The
 | `documentation` | 1 | under 1 hour |
 | `beginner` | 10 | 30 minutes to 2 hours |
 | `hard` | 20 | 3 to 6 hours |
-
+ 
 - **PRs are not merged during the event.** The repo stays exactly as it is, so every team starts from the same code. Judges score each PR on its own at the end.
 - **Several teams can work on the same issue.** You don't need to claim anything; just pick an issue and start.
 - Every issue stands alone, so your PR must work by itself and must not depend on anyone else's PR.
