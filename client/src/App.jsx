@@ -21,6 +21,16 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+      <footer className="footer">
+        <span>Built at Hacktoberfest Hack Day 2026 · EES, NIT Jamshedpur</span>
+        <a
+          href="https://github.com/WhiteClueGaming/HacktoberFest_EES"
+          target="_blank"
+          rel="noreferrer"
+        >
+          GitHub
+        </a>
+      </footer>
     </AuthProvider>
   );
 }
