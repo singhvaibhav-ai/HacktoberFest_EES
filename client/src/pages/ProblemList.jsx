@@ -30,7 +30,11 @@ export default function ProblemList() {
               <td>
                 <Link to={`/problems/${p.slug}`}>{p.title}</Link>
               </td>
-              <td>{p.difficulty}</td>
+              <td>
+                <span className={`badge badge-${(p.difficulty || '').toLowerCase()}`}>
+                  {p.difficulty}
+                </span>
+              </td>
               <td>{p.tags?.join(', ')}</td>
             </tr>
           ))}
