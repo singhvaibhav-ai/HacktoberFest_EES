@@ -3,6 +3,9 @@ import cors from 'cors';
 import { listProblems, getProblem } from './problems.js';
 import { addSubmission, listSubmissions } from './db.js';
 import { authRoutes, currentUser, requireLogin } from './auth.js';
+import { loadEnv } from './env.js';
+
+loadEnv();
 
 const app = express();
 const PORT = process.env.PORT || 4000;

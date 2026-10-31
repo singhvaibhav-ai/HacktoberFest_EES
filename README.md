@@ -57,6 +57,10 @@ Open http://localhost:5173, click **Sign up** to create a team account, and solv
 - The frontend runs on port 5173 and the API on port 4000.
 - The first submission takes a few seconds while Python loads in your browser.
 
+### GitHub sign-in
+
+To enable **Continue with GitHub**, create an OAuth App in GitHub under **Settings → Developer settings → OAuth Apps**. Set its homepage URL to `http://localhost:5173` and its authorization callback URL to `http://localhost:4000/api/auth/github/callback`. Copy `.env.example` to `.env`, fill in the app's client ID and client secret, then run `npm run dev`. Keep `.env` private; it is git-ignored.
+
 ## Contributing
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before you start. It explains the tags and points, how PRs are judged, how to add a problem and what a good PR looks like. PRs are not merged during the event; each one is judged on its own.

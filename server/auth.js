@@ -4,7 +4,17 @@ import crypto from 'node:crypto';
 import { addUser, findUser } from './db.js';
 
 const COOKIE = 'codearena_session';
+const OAUTH_STATE_COOKIE = 'codearena_github_state';
 const sessions = new Map(); // token -> username
+
+function githubConfig() {
+  const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } = process.env;
+  const callbackUrl = process.env.GITHUB_CALLBACK_URL || 'http://localhost:4000/api/auth/github/callback';
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  return GITHUB_CLIENT_ID && GITHUB_CLIENT_SECRET
+    ? { clientId: GITHUB_CLIENT_ID, clientSecret: GITHUB_CLIENT_SECRET, callbackUrl, clientUrl }
+    : null;
+}
 
 function readCookie(req, name) {
   const header = req.headers.cookie || '';
@@ -21,6 +31,23 @@ function startSession(res, username) {
   res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 });
 }
 
+function clearOAuthStateCookie(res) {
+  res.clearCookie(OAUTH_STATE_COOKIE, { path: '/api/auth/github/callback' });
+}
+
+function equalState(expected, actual) {
+  if (typeof expected !== 'string' || typeof actual !== 'string') return false;
+  const expectedBytes = Buffer.from(expected);
+  const actualBytes = Buffer.from(actual);
+  return expectedBytes.length === actualBytes.length && crypto.timingSafeEqual(expectedBytes, actualBytes);
+}
+
+function redirectWithOAuthError(res, clientUrl, reason) {
+  const destination = new URL('/login', clientUrl);
+  destination.searchParams.set('error', reason);
+  res.redirect(destination.toString());
+}
+
 // Puts the logged-in team (if any) on req.user.
 export function currentUser(req, res, next) {
   const token = readCookie(req, COOKIE);
@@ -35,6 +62,83 @@ export function requireLogin(req, res, next) {
 }
 
 export function authRoutes(app) {
+  app.get('/api/auth/github', (req, res) => {
+    const config = githubConfig();
+    if (!config) {
+      return res.status(503).json({ error: 'GitHub sign-in is not configured on this server' });
+    }
+
+    const state = crypto.randomBytes(32).toString('hex');
+    res.cookie(OAUTH_STATE_COOKIE, state, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 10 * 60 * 1000,
+      path: '/api/auth/github/callback',
+    });
+
+    const authorizeUrl = new URL('https://github.com/login/oauth/authorize');
+    authorizeUrl.searchParams.set('client_id', config.clientId);
+    authorizeUrl.searchParams.set('redirect_uri', config.callbackUrl);
+    authorizeUrl.searchParams.set('state', state);
+    res.redirect(authorizeUrl.toString());
+  });
+
+  app.get('/api/auth/github/callback', async (req, res) => {
+    const config = githubConfig();
+    const stateCookie = readCookie(req, OAUTH_STATE_COOKIE);
+    clearOAuthStateCookie(res);
+
+    if (!config) {
+      return res.status(503).json({ error: 'GitHub sign-in is not configured on this server' });
+    }
+    if (!equalState(stateCookie, req.query.state)) {
+      return redirectWithOAuthError(res, config.clientUrl, 'github_state');
+    }
+    if (req.query.error) {
+      return redirectWithOAuthError(res, config.clientUrl, 'github_cancelled');
+    }
+    if (typeof req.query.code !== 'string') {
+      return redirectWithOAuthError(res, config.clientUrl, 'github_failed');
+    }
+
+    try {
+      const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: new URLSearchParams({
+          client_id: config.clientId,
+          client_secret: config.clientSecret,
+          code: req.query.code,
+          redirect_uri: config.callbackUrl,
+        }),
+      });
+      const tokenData = await tokenResponse.json();
+      if (!tokenResponse.ok || !tokenData.access_token) {
+        throw new Error('GitHub did not return an access token');
+      }
+
+      const profileResponse = await fetch('https://api.github.com/user', {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${tokenData.access_token}`,
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      });
+      const profile = await profileResponse.json();
+      if (!profileResponse.ok || typeof profile.login !== 'string' || !profile.login.trim()) {
+        throw new Error('GitHub did not return a username');
+      }
+
+      const username = profile.login.trim();
+      if (!findUser(username)) addUser({ username, password: null });
+      startSession(res, username);
+      return res.redirect(config.clientUrl);
+    } catch {
+      return redirectWithOAuthError(res, config.clientUrl, 'github_failed');
+    }
+  });
+
   app.post('/api/auth/signup', (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
@@ -56,7 +160,7 @@ export function authRoutes(app) {
     if (!user) {
       return res.status(401).json({ error: 'No team with that name' });
     }
-    if (user.password !== password) {
+    if (typeof user.password !== 'string' || user.password !== password) {
       return res.status(401).json({ error: 'Wrong password' });
     }
     startSession(res, user.username);
