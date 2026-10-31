@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { marked } from 'marked';
 import { api } from '../api.js';
 import { judge } from '../judge/runner.js';
-import { VERDICT_LABELS } from '../judge/verdict.js';
+import { VERDICT_LABELS, VERDICT_CLASSES } from '../judge/verdict.js';
 import { LANGUAGES } from '../languages.js';
 import { useAuth } from '../auth.jsx';
 import CodeEditor from '../components/CodeEditor.jsx';
@@ -94,7 +94,7 @@ export default function ProblemPage() {
 
         {status && <p className="muted">{status}</p>}
         {result && (
-          <div className="verdict">
+          <div className={`verdict ${VERDICT_CLASSES[result.verdict] || ''}`}>
             <strong>{VERDICT_LABELS[result.verdict] || result.verdict}</strong>
             {result.total ? (
               <span className="muted">
@@ -128,7 +128,7 @@ export default function ProblemPage() {
                 <tr key={s.id}>
                   <td>{new Date(s.createdAt).toLocaleTimeString()}</td>
                   <td>{s.language}</td>
-                  <td>{s.verdict}</td>
+                  <td className={VERDICT_CLASSES[s.verdict] || ''}>{s.verdict}</td>
                   <td>
                     {s.passed}/{s.total}
                   </td>
