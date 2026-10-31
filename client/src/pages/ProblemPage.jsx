@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { marked } from 'marked';
 import { api } from '../api.js';
-import { judge } from '../judge/runner.js';
+import { judge, runCode } from '../judge/runner.js';
 import { VERDICT_LABELS } from '../judge/verdict.js';
 import { LANGUAGES } from '../languages.js';
 import { useAuth } from '../auth.jsx';
@@ -15,16 +15,27 @@ export default function ProblemPage() {
   const [problem, setProblem] = useState(null);
   const [language, setLanguage] = useState(LANGUAGES[0]);
   const [code, setCode] = useState(LANGUAGES[0].template);
+  const [customInput, setCustomInput] = useState('');
   const [status, setStatus] = useState('');
   const [result, setResult] = useState(null);
+  const [runResult, setRunResult] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [running, setRunning] = useState(false);
 
   useEffect(() => {
     setProblem(null);
     setResult(null);
+    setRunResult(null);
     setCode(language.template);
-    api.problem(slug).then(setProblem);
+    api.problem(slug).then((p) => {
+      setProblem(p);
+      if (p?.tests?.[0]?.input) {
+        setCustomInput(p.tests[0].input);
+      } else {
+        setCustomInput('');
+      }
+    });
   }, [slug]);
 
   useEffect(() => {
@@ -36,6 +47,21 @@ export default function ProblemPage() {
     api.submissions(slug, user.username).then(setSubmissions);
   }
 
+  async function handleRun() {
+    setRunning(true);
+    setResult(null);
+    setRunResult(null);
+    try {
+      const res = await runCode(code, customInput, problem, setStatus);
+      setRunResult(res);
+    } catch (err) {
+      setRunResult({ type: 'runtime', message: String(err) });
+    } finally {
+      setStatus('');
+      setRunning(false);
+    }
+  }
+
   async function submit() {
     // Like LeetCode: anyone can read and write code, but submitting needs an account.
     if (!user) {
@@ -44,6 +70,7 @@ export default function ProblemPage() {
     }
     setBusy(true);
     setResult(null);
+    setRunResult(null);
     try {
       const res = await judge(code, problem, setStatus);
       setResult(res);
@@ -58,6 +85,8 @@ export default function ProblemPage() {
   }
 
   if (!problem) return <p className="muted">Loading...</p>;
+
+  const isBusy = busy || running;
 
   return (
     <div className="problem-layout">
@@ -82,17 +111,48 @@ export default function ProblemPage() {
             ))}
           </select>
           <div className="spacer" />
-          <button className="ghost" disabled title="Not implemented yet">
-            Run
+          <button className="ghost" onClick={handleRun} disabled={isBusy}>
+            {running ? 'Running...' : 'Run'}
           </button>
-          <button onClick={submit} disabled={busy}>
+          <button onClick={submit} disabled={isBusy}>
             {busy ? 'Judging...' : user ? 'Submit' : 'Log in to submit'}
           </button>
         </div>
 
         <CodeEditor language={language.monaco} value={code} onChange={setCode} />
 
+        <div className="custom-input-container">
+          <label htmlFor="custom-input">Custom input</label>
+          <textarea
+            id="custom-input"
+            value={customInput}
+            onChange={(e) => setCustomInput(e.target.value)}
+            placeholder="Input to pass to stdin..."
+            rows={3}
+          />
+        </div>
+
         {status && <p className="muted">{status}</p>}
+
+        {runResult && (
+          <div className="verdict">
+            <strong className={runResult.type === 'ok' ? '' : 'error'}>
+              {runResult.type === 'ok'
+                ? 'Output'
+                : runResult.type === 'timeout'
+                ? 'Time Limit Exceeded'
+                : runResult.type === 'syntax'
+                ? 'Compilation Error'
+                : 'Runtime Error'}
+            </strong>
+            <pre>
+              {runResult.type === 'ok'
+                ? (runResult.stdout !== '' ? runResult.stdout : '(no output)')
+                : runResult.message}
+            </pre>
+          </div>
+        )}
+
         {result && (
           <div className="verdict">
             <strong>{VERDICT_LABELS[result.verdict] || result.verdict}</strong>

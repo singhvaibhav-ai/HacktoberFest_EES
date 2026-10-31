@@ -198,3 +198,21 @@ select {
   white-space: pre-wrap;
   font-size: 13px;
 }
+
+textarea {
+  width: 100%;
+  resize: vertical;
+  font-family: monospace;
+}
+
+.custom-input-container {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.custom-input-container label {
+  font-size: 14px;
+  font-weight: 600;
+}

@@ -18,7 +18,7 @@ function runTest(worker, code, input, timeLimitMs) {
   return new Promise((resolve) => {
     const timer = setTimeout(() => {
       worker.terminate();
-      resolve({ type: 'timeout' });
+      resolve({ type: 'timeout', message: `Time limit exceeded (${timeLimitMs}ms)` });
     }, timeLimitMs);
 
     worker.onmessage = (e) => {
@@ -28,6 +28,33 @@ function runTest(worker, code, input, timeLimitMs) {
     worker.postMessage({ type: 'run', code, input });
   });
 }
+
+/**
+ * Runs code against custom input without saving a submission.
+ * onStatus is called with short status messages for the UI.
+ * Returns { type: 'ok' | 'syntax' | 'runtime' | 'timeout', stdout?: string, message?: string }.
+ */
+export async function runCode(code, input = '', timeLimit = DEFAULT_TIME_LIMIT_MS, onStatus = () => {}) {
+  onStatus('Starting Python...');
+  const { worker, ready } = startWorker();
+  await ready;
+
+  const timeLimitMs =
+    typeof timeLimit === 'object' && timeLimit !== null
+      ? (timeLimit.timeLimitMs ?? timeLimit.timeLimit ?? DEFAULT_TIME_LIMIT_MS)
+      : (typeof timeLimit === 'number' ? timeLimit : DEFAULT_TIME_LIMIT_MS);
+
+  onStatus('Running...');
+  const result = await runTest(worker, code, input, timeLimitMs);
+  if (result.type === 'timeout' && !result.message) {
+    result.message = `Time limit exceeded (${timeLimitMs}ms)`;
+  }
+
+  worker.terminate();
+  return result;
+}
+
+export const run = runCode;
 
 /**
  * Judges a submission against a problem's tests.
