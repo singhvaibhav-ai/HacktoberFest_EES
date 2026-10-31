@@ -6,6 +6,32 @@ import { addUser, findUser } from './db.js';
 const COOKIE = 'codearena_session';
 const sessions = new Map(); // token -> username
 
+function hashPassword(password) {
+  return new Promise((resolve, reject) => {
+    const salt = crypto.randomBytes(16).toString('hex');
+    crypto.scrypt(password, salt, 64, (err, derivedKey) => {
+      if (err) return reject(err);
+      resolve(`${salt}:${derivedKey.toString('hex')}`);
+    });
+  });
+}
+
+function verifyPassword(password, storedHash) {
+  return new Promise((resolve) => {
+    if (!storedHash || !storedHash.includes(':')) return resolve(false);
+    const [salt, keyHex] = storedHash.split(':');
+    const keyBuffer = Buffer.from(keyHex, 'hex');
+    crypto.scrypt(password, salt, keyBuffer.length, (err, derivedKey) => {
+      if (err) return resolve(false);
+      try {
+        resolve(crypto.timingSafeEqual(keyBuffer, derivedKey));
+      } catch {
+        resolve(false);
+      }
+    });
+  });
+}
+
 function readCookie(req, name) {
   const header = req.headers.cookie || '';
   for (const part of header.split(';')) {
@@ -35,7 +61,7 @@ export function requireLogin(req, res, next) {
 }
 
 export function authRoutes(app) {
-  app.post('/api/auth/signup', (req, res) => {
+  app.post('/api/auth/signup', async (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
     if (!username || !password) {
@@ -44,19 +70,25 @@ export function authRoutes(app) {
     if (findUser(username)) {
       return res.status(409).json({ error: 'That team name is taken' });
     }
-    addUser({ username, password });
-    startSession(res, username);
-    res.status(201).json({ username });
+    try {
+      const passwordHash = await hashPassword(password);
+      addUser({ username, password: passwordHash });
+      startSession(res, username);
+      res.status(201).json({ username });
+    } catch {
+      res.status(500).json({ error: 'Failed to process signup' });
+    }
   });
 
-  app.post('/api/auth/login', (req, res) => {
+  app.post('/api/auth/login', async (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
     const user = findUser(username);
     if (!user) {
       return res.status(401).json({ error: 'No team with that name' });
     }
-    if (user.password !== password) {
+    const isValid = await verifyPassword(password, user.password);
+    if (!isValid) {
       return res.status(401).json({ error: 'Wrong password' });
     }
     startSession(res, user.username);
