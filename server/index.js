@@ -7,6 +7,11 @@ import { authRoutes, currentUser, requireLogin } from './auth.js';
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+const SUBMISSION_INTERVAL_MS = 10 * 1000; // 10 seconds
+const lastSubmissions = new Map(); // username -> timestamp
+const MAX_CODE_BYTES = 64 * 1024; // 64 KB
+const ALLOWED_VERDICTS = new Set(['AC', 'WA', 'TLE', 'RE', 'CE']);
+
 app.use(cors());
 app.use(express.json());
 app.use(currentUser);
@@ -28,11 +33,27 @@ app.get('/api/problems/:slug', (req, res) => {
 // The browser runs the code and works out the verdict, then reports it here.
 // You must be logged in to submit.
 app.post('/api/submissions', requireLogin, (req, res) => {
-  const { slug, language, code, verdict, passed, total } = req.body;
-  const username = req.body.username || req.user.username;
-  if (!slug || !verdict) {
-    return res.status(400).json({ error: 'slug and verdict are required' });
+  const username = req.user.username;
+  const now = Date.now();
+  const lastTime = lastSubmissions.get(username) || 0;
+  if (now - lastTime < SUBMISSION_INTERVAL_MS) {
+    const waitSec = Math.ceil((SUBMISSION_INTERVAL_MS - (now - lastTime)) / 1000);
+    res.setHeader('Retry-After', waitSec);
+    return res.status(429).json({ error: `Please wait ${waitSec}s before submitting again` });
   }
+
+  const { slug, language, code, verdict, passed, total } = req.body;
+  if (!slug || typeof slug !== 'string' || !getProblem(slug)) {
+    return res.status(400).json({ error: 'Valid problem slug is required' });
+  }
+  if (!verdict || typeof verdict !== 'string' || !ALLOWED_VERDICTS.has(verdict)) {
+    return res.status(400).json({ error: 'Valid verdict is required' });
+  }
+  if (code && typeof code === 'string' && Buffer.byteLength(code, 'utf8') > MAX_CODE_BYTES) {
+    return res.status(400).json({ error: 'Code size exceeds 64 KB limit' });
+  }
+
+  lastSubmissions.set(username, now);
   const row = addSubmission({ username, slug, language, code, verdict, passed, total });
   res.status(201).json(row);
 });

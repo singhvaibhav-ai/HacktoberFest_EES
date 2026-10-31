@@ -42,6 +42,10 @@ export default function ProblemPage() {
       navigate(`/login?next=/problems/${slug}`);
       return;
     }
+    if (new Blob([code]).size > 64 * 1024) {
+      setResult({ verdict: 'CE', message: 'Code size exceeds 64 KB limit' });
+      return;
+    }
     setBusy(true);
     setResult(null);
     try {
@@ -50,7 +54,7 @@ export default function ProblemPage() {
       await api.submit({ username: user.username, slug, language: language.id, code, ...res });
       loadSubmissions();
     } catch (err) {
-      setResult({ verdict: 'RE', message: String(err) });
+      setResult({ verdict: 'RE', message: err.message || String(err) });
     } finally {
       setStatus('');
       setBusy(false);
