@@ -57,7 +57,7 @@ Each problem lives in its own folder under `problems/`:
 
 ```
 problems/two-sum/
-  meta.json        title, difficulty, tags, time limit
+  meta.json        title, difficulty, tags, time limit (timeLimitMs in milliseconds)
   statement.md     the problem statement in Markdown
   tests/1.in       input for test 1
   tests/1.out      expected output for test 1
