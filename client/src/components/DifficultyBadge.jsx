@@ -9,3 +9,4 @@ export default function DifficultyBadge({ difficulty }) {
   const modifier = MODIFIERS[difficulty.toLowerCase()] || '';
   return <span className={`difficulty ${modifier}`.trim()}>{difficulty}</span>;
 }
+
