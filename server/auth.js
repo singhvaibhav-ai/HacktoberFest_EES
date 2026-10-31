@@ -4,7 +4,8 @@ import crypto from 'node:crypto';
 import { addUser, findUser } from './db.js';
 
 const COOKIE = 'codearena_session';
-const sessions = new Map(); // token -> username
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+const sessions = new Map(); // token -> { username, expiresAt }
 
 function readCookie(req, name) {
   const header = req.headers.cookie || '';
@@ -17,15 +18,25 @@ function readCookie(req, name) {
 
 function startSession(res, username) {
   const token = crypto.randomBytes(24).toString('hex');
-  sessions.set(token, username);
-  res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 });
+  const expiresAt = Date.now() + SESSION_TTL_MS;
+  sessions.set(token, { username, expiresAt });
+  res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', maxAge: SESSION_TTL_MS });
 }
 
 // Puts the logged-in team (if any) on req.user.
 export function currentUser(req, res, next) {
   const token = readCookie(req, COOKIE);
-  const username = token && sessions.get(token);
-  req.user = username ? { username } : null;
+  const session = token && sessions.get(token);
+  if (session) {
+    if (Date.now() > session.expiresAt) {
+      sessions.delete(token);
+      req.user = null;
+    } else {
+      req.user = { username: session.username };
+    }
+  } else {
+    req.user = null;
+  }
   next();
 }
 
@@ -64,6 +75,10 @@ export function authRoutes(app) {
   });
 
   app.post('/api/auth/logout', (req, res) => {
+    const token = readCookie(req, COOKIE);
+    if (token) {
+      sessions.delete(token);
+    }
     res.clearCookie(COOKIE);
     res.json({ ok: true });
   });
