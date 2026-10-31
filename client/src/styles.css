@@ -140,6 +140,24 @@ select {
   font-size: 14px;
 }
 
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 72px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
