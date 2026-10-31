@@ -149,6 +149,19 @@ a.button {
   font-size: 14px;
 }
 
+.password-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.password-input-row input {
+  flex: 1;
+}
+
+.password-input-row .toggle-password {
+  white-space: nowrap;
+}
+
 button.ghost {
   background: transparent;
   color: var(--text);
