@@ -3,14 +3,26 @@ import { toVerdict } from './verdict.js';
 
 const DEFAULT_TIME_LIMIT_MS = 2000;
 
-function startWorker() {
-  const worker = new Worker('/python-worker.js', { type: 'module' });
+const WORKERS = {
+  python: { url: '/python-worker.js', label: 'Python' },
+  ruby: { label: 'Ruby' },
+};
+
+function startWorker(language) {
+  const config = WORKERS[language] || WORKERS.python;
+  // Ruby's worker is bundled by Vite because it imports npm packages.
+  const worker = config.url
+    ? new Worker(config.url, { type: 'module' })
+    : new Worker(new URL('./ruby-worker.js', import.meta.url), { type: 'module' });
   const ready = new Promise((resolve, reject) => {
-    worker.onmessage = (e) => e.data.type === 'ready' && resolve();
-    worker.onerror = (e) => reject(new Error(e.message || 'Could not start Python'));
+    worker.onmessage = (e) => {
+      if (e.data.type === 'ready') resolve();
+      if (e.data.type === 'error') reject(new Error(e.data.message || `Could not start ${config.label}`));
+    };
+    worker.onerror = (e) => reject(new Error(e.message || `Could not start ${config.label}`));
   });
   worker.postMessage({ type: 'init' });
-  return { worker, ready };
+  return { worker, ready, label: config.label };
 }
 
 // Runs one test. Resolves with { type: 'ok' | 'syntax' | 'runtime' | 'timeout', ... }
@@ -34,9 +46,9 @@ function runTest(worker, code, input, timeLimitMs) {
  * onStatus is called with short status messages for the UI.
  * Returns { verdict, passed, total, message }.
  */
-export async function judge(code, problem, onStatus = () => {}) {
-  onStatus('Starting Python...');
-  const { worker, ready } = startWorker();
+export async function judge(code, problem, onStatus = () => {}, language = 'python') {
+  const { worker, ready, label } = startWorker(language);
+  onStatus(`Starting ${label}...`);
   await ready;
 
   const timeLimitMs = problem.timeLimitMs ?? problem.timeLimit ?? DEFAULT_TIME_LIMIT_MS;

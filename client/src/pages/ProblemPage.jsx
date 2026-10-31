@@ -25,7 +25,7 @@ export default function ProblemPage() {
     setResult(null);
     setCode(language.template);
     api.problem(slug).then(setProblem);
-  }, [slug]);
+  }, [slug, language]);
 
   useEffect(() => {
     loadSubmissions();
@@ -45,7 +45,7 @@ export default function ProblemPage() {
     setBusy(true);
     setResult(null);
     try {
-      const res = await judge(code, problem, setStatus);
+      const res = await judge(code, problem, setStatus, language.id);
       setResult(res);
       await api.submit({ username: user.username, slug, language: language.id, code, ...res });
       loadSubmissions();
