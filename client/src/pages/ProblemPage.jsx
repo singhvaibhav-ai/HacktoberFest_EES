@@ -73,7 +73,8 @@ export default function ProblemPage() {
     try {
       const res = await judge(code, language.id, problem, setStatus);
       setResult(res);
-      await api.submit({ username: user.username, slug, language: language.id, code, ...res });
+      const { verdict, passed, total } = res;
+      await api.submit({ slug, language: language.id, code, verdict, passed, total });
       loadSubmissions();
     } catch (err) {
       setResult({ verdict: 'RE', message: String(err) });
@@ -169,6 +170,33 @@ export default function ProblemPage() {
               </span>
             ) : null}
             {result.message && <pre>{result.message}</pre>}
+          </div>
+        )}
+
+        {result && result.results && (
+          <div className="test-boxes">
+            {result.results.map((t, i) => (
+              <span key={i} className={`test-box test-${t.state}} title={Test ${i + 1} — ${t.state}`}>
+                {t.state === 'passed' ? '✓' : t.state === 'failed' ? '✕' : t.state === 'timeout' ? '⏱' : '–'}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {result && result.firstFailure && (
+          <div className="failure-io">
+            <div>
+              <h4>Input</h4>
+              <pre>{result.firstFailure.input}</pre>
+            </div>
+            <div>
+              <h4>Expected output</h4>
+              <pre>{result.firstFailure.expected}</pre>
+            </div>
+            <div>
+              <h4>Your output</h4>
+              <pre>{result.firstFailure.actual || '(no output)'}</pre>
+            </div>
           </div>
         )}
 
