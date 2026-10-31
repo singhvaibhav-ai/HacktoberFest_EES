@@ -5,6 +5,11 @@
   --muted: #6b6b78;
   --border: #e2e2e8;
   --accent: #6c4cf5;
+  --verdict-ac: #1a7f37;
+  --verdict-wa: #d33;
+  --verdict-tle: #b45309;
+  --verdict-re: #7c3aed;
+  --verdict-ce: #6b6b78;
 }
 
 .dark {
@@ -14,6 +19,11 @@
   --muted: #9a9aab;
   --border: #2d2d3a;
   --accent: #9b85ff;
+  --verdict-ac: #56d364;
+  --verdict-wa: #ff7b72;
+  --verdict-tle: #f0883e;
+  --verdict-re: #c297ff;
+  --verdict-ce: #9ca3af;
 }
 
 * {
@@ -197,4 +207,24 @@ select {
 .verdict pre {
   white-space: pre-wrap;
   font-size: 13px;
+}
+
+.verdict-ac {
+  color: var(--verdict-ac);
+}
+
+.verdict-wa {
+  color: var(--verdict-wa);
+}
+
+.verdict-tle {
+  color: var(--verdict-tle);
+}
+
+.verdict-re {
+  color: var(--verdict-re);
+}
+
+.verdict-ce {
+  color: var(--verdict-ce);
 }
