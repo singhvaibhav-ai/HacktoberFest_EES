@@ -9,6 +9,8 @@ async function request(path, options) {
 
 export const api = {
   problems: () => request('/api/problems'),
+  solved: (username) =>
+    request('/api/solved' + (username ? '?username=' + encodeURIComponent(username) : '')),
   problem: (slug) => request(`/api/problems/${slug}`),
   submissions: (slug, username) =>
     request(`/api/submissions?slug=${encodeURIComponent(slug)}&username=${encodeURIComponent(username)}`),
