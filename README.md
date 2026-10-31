@@ -1,5 +1,7 @@
 ![HackDay x Hacktoberfest 2026, NIT Jamshedpur](docs/banner.jpg)
 
+[हिंदी में पढ़ें](README.hi.md)
+
 # CodeArena
 
 A tiny online judge, like a mini LeetCode, built for **HackDay x Hacktoberfest 2026 at NIT Jamshedpur**, organised by the Electrical Engineering Society.
