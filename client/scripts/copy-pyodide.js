@@ -17,3 +17,12 @@ for (const file of fs.readdirSync(src)) {
   }
 }
 console.log(`Copied Pyodide into ${path.relative(process.cwd(), dest)}`);
+
+try {
+  const fengariSrc = require.resolve('fengari-web/dist/fengari-web.js');
+  const fengariDest = path.join(__dirname, '..', 'public', 'fengari-web.js');
+  fs.copyFileSync(fengariSrc, fengariDest);
+  console.log(`Copied Fengari into ${path.relative(process.cwd(), fengariDest)}`);
+} catch (e) {
+  // Ignore if fengari-web is not installed yet
+}
