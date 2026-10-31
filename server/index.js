@@ -1,8 +1,48 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import { listProblems, getProblem } from './problems.js';
 import { addSubmission, listSubmissions } from './db.js';
 import { authRoutes, currentUser, requireLogin } from './auth.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function loadEnv() {
+  const envCandidates = [
+    path.resolve(process.cwd(), '.env'),
+    path.resolve(process.cwd(), '../.env'),
+    path.resolve(__dirname, '../.env'),
+    path.resolve(__dirname, '.env'),
+  ];
+  for (const envPath of envCandidates) {
+    if (fs.existsSync(envPath)) {
+      try {
+        if (typeof process.loadEnvFile === 'function') {
+          process.loadEnvFile(envPath);
+        } else {
+          const content = fs.readFileSync(envPath, 'utf8');
+          for (const line of content.split('\n')) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('#')) continue;
+            const [k, ...v] = trimmed.split('=');
+            const key = k.trim();
+            const val = v.join('=').trim().replace(/^["']|["']$/g, '');
+            if (key && !(key in process.env)) {
+              process.env[key] = val;
+            }
+          }
+        }
+        break;
+      } catch (err) {
+        // ignore
+      }
+    }
+  }
+}
+
+loadEnv();
 
 const app = express();
 const PORT = process.env.PORT || 4000;

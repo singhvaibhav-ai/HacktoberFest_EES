@@ -124,6 +124,49 @@ a.button {
   font-size: 14px;
 }
 
+.github-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #24292f;
+  color: #fff !important;
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+  box-sizing: border-box;
+  margin-top: 16px;
+  border: 1px solid #30363d;
+  transition: background 0.15s ease;
+}
+
+.github-btn:hover {
+  background: #1b1f24;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border);
+}
+
+.auth-divider span {
+  padding: 0 10px;
+}
+
 button.ghost {
   background: transparent;
   color: var(--text);
