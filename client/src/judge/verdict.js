@@ -7,6 +7,7 @@
 export function toVerdict(result) {
   if (result.type === 'ok') return result.passed ? 'AC' : 'WA';
   if (result.type === 'syntax') return 'CE';
+  if (result.type === 'timeout') return 'TLE';
   // anything else means the program crashed
   return 'RE';
 }
