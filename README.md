@@ -41,6 +41,9 @@ server/            Express API (stores data in server/data/db.json)
 problems/          one folder per problem
 ```
 
+See [docs/auth.md](docs/auth.md) for the authentication flow, routes, cookie,
+and storage details.
+
 ## Run it locally
 
 You need [Node.js](https://nodejs.org/) 20 or newer.
