@@ -3,7 +3,13 @@ async function request(path, options) {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const error = new Error(body.error || `Request failed: ${res.status}`);
+    error.status = res.status;
+    error.retryAfter = Number(res.headers.get('Retry-After')) || 0;
+    throw error;
+  }
   return res.json();
 }
 
