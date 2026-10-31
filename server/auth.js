@@ -1,7 +1,7 @@
 // Team accounts: sign up, log in, log out.
 // Sessions live in memory, so everyone has to log in again after the server restarts.
 import crypto from 'node:crypto';
-import { addUser, findUser } from './db.js';
+import { addUser, findUser, hashPassword, verifyPassword } from './db.js';
 
 const COOKIE = 'codearena_session';
 const sessions = new Map(); // token -> username
@@ -35,7 +35,7 @@ export function requireLogin(req, res, next) {
 }
 
 export function authRoutes(app) {
-  app.post('/api/auth/signup', (req, res) => {
+  app.post('/api/auth/signup', async (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
     if (!username || !password) {
@@ -44,19 +44,20 @@ export function authRoutes(app) {
     if (findUser(username)) {
       return res.status(409).json({ error: 'That team name is taken' });
     }
-    addUser({ username, password });
+    const passwordCredentials = await hashPassword(password);
+    addUser({ username, ...passwordCredentials });
     startSession(res, username);
     res.status(201).json({ username });
   });
 
-  app.post('/api/auth/login', (req, res) => {
+  app.post('/api/auth/login', async (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
     const user = findUser(username);
     if (!user) {
       return res.status(401).json({ error: 'No team with that name' });
     }
-    if (user.password !== password) {
+    if (!(await verifyPassword(password, user))) {
       return res.status(401).json({ error: 'Wrong password' });
     }
     startSession(res, user.username);
