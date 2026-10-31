@@ -46,11 +46,24 @@ app.get('/api/leaderboard', (req, res) => {
   const scores = {};
   for (const s of listSubmissions()) {
     if (s.verdict !== 'AC') continue;
-    scores[s.username] = (scores[s.username] || 0) + 1;
+    const entry = (scores[s.username] ||= { solved: new Set(), lastAcceptedAt: '' });
+    // Count each problem once, however many times it was accepted.
+    entry.solved.add(s.slug);
+    if (s.createdAt > entry.lastAcceptedAt) entry.lastAcceptedAt = s.createdAt;
   }
   const board = Object.entries(scores)
-    .map(([username, solved]) => ({ username, solved }))
-    .sort((a, b) => b.solved - a.solved);
+    .map(([username, { solved, lastAcceptedAt }]) => ({
+      username,
+      solved: solved.size,
+      lastAcceptedAt,
+    }))
+    .sort(
+      (a, b) =>
+        b.solved - a.solved ||
+        // Bonus: on a tie, whoever reached their last acceptance first ranks higher.
+        a.lastAcceptedAt.localeCompare(b.lastAcceptedAt) ||
+        a.username.localeCompare(b.username)
+    );
   res.json(board);
 });
 

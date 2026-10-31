@@ -153,6 +153,15 @@ select {
   border-bottom: 1px solid var(--border);
 }
 
+.table tbody tr.highlight {
+  background: rgba(108, 76, 245, 0.12);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+.table tbody tr.highlight td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
 .muted {
   color: var(--muted);
 }
