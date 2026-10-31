@@ -43,14 +43,15 @@ app.get('/api/submissions', (req, res) => {
 });
 
 app.get('/api/leaderboard', (req, res) => {
-  const scores = {};
+  const solved = {};
   for (const s of listSubmissions()) {
     if (s.verdict !== 'AC') continue;
-    scores[s.username] = (scores[s.username] || 0) + 1;
+    if (!solved[s.username]) solved[s.username] = new Set();
+    solved[s.username].add(s.slug);
   }
-  const board = Object.entries(scores)
-    .map(([username, solved]) => ({ username, solved }))
-    .sort((a, b) => b.solved - a.solved);
+  const board = Object.entries(solved)
+    .map(([username, slugs]) => ({ username, solved: slugs.size }))
+    .sort((a, b) => b.solved - a.solved || a.username.localeCompare(b.username));
   res.json(board);
 });
 
