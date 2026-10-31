@@ -1,0 +1,7 @@
+{
+  "title": "Second Largest",
+  "difficulty": "Easy",
+  "tags": ["arrays", "sorting"],
+  "order": 7,
+  "timeLimitMs": 2000
+}
