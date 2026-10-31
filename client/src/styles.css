@@ -198,3 +198,16 @@ select {
   white-space: pre-wrap;
   font-size: 13px;
 }
+
+.footer {
+  text-align: center;
+  padding: 24px;
+  margin-top: 40px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.footer a {
+  color: var(--accent);
+}
