@@ -331,3 +331,4 @@ sequenceDiagram
 
 - **[`client/src/pages/ProblemPage.jsx`](../client/src/pages/ProblemPage.jsx)**:
   - Handles the submission button logic, conditional redirect to `/login?next=...`, Pyodide worker execution, and posting to `/api/submissions`.
+
