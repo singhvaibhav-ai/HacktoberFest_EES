@@ -1,13 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 
 export default function Navbar() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(() => localStorage.getItem('codearena-theme') === 'dark');
   const { user, checking, logout } = useAuth();
 
+  useEffect(() => {
+    document.body.classList.toggle('dark', dark);
+    localStorage.setItem('codearena-theme', dark ? 'dark' : 'light');
+  }, [dark]);
+
   return (
-    <nav className={`navbar ${dark ? 'dark' : ''}`}>
+    <nav className="navbar">
       <Link to="/" className="brand">
         Code<span>Arena</span>
       </Link>
