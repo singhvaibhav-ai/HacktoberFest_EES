@@ -19,6 +19,7 @@ export default function ProblemPage() {
   const [result, setResult] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setProblem(null);
@@ -34,6 +35,22 @@ export default function ProblemPage() {
   function loadSubmissions() {
     if (!user) return setSubmissions([]);
     api.submissions(slug, user.username).then(setSubmissions);
+  }
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
+  }
+
+  function resetCode() {
+    if (window.confirm('Reset to starter template?')) {
+      setCode(language.template);
+    }
   }
 
   async function submit() {
@@ -81,6 +98,12 @@ export default function ProblemPage() {
               </option>
             ))}
           </select>
+          <button type="button" className="ghost" onClick={copyCode} title="Copy code">
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+          <button type="button" className="ghost" onClick={resetCode} title="Reset code">
+            Reset
+          </button>
           <div className="spacer" />
           <button className="ghost" disabled title="Not implemented yet">
             Run
