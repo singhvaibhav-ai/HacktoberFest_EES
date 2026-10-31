@@ -1,19 +1,45 @@
 import express from 'express';
 import cors from 'cors';
-import { listProblems, getProblem } from './problems.js';
+import { listProblems, getProblem, saveProblem } from './problems.js';
 import { addSubmission, listSubmissions } from './db.js';
 import { authRoutes, currentUser, requireLogin } from './auth.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin';
 
 app.use(cors());
 app.use(express.json());
 app.use(currentUser);
 
+function requireAdmin(req, res, next) {
+  const password = req.headers['x-admin-password'];
+  if (!password || password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid admin password' });
+  }
+  next();
+}
+
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 authRoutes(app);
+
+app.post('/api/admin/verify', (req, res) => {
+  const { password } = req.body || {};
+  if (password && password === ADMIN_PASSWORD) {
+    return res.json({ ok: true });
+  }
+  return res.status(401).json({ error: 'Incorrect admin password' });
+});
+
+app.post('/api/admin/problems', requireAdmin, (req, res) => {
+  try {
+    const saved = saveProblem(req.body);
+    res.status(201).json(saved);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
 app.get('/api/problems', (req, res) => {
   res.json(listProblems());

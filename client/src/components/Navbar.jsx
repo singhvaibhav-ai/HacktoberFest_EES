@@ -13,10 +13,11 @@ export default function Navbar() {
       </Link>
       <NavLink to="/">Problems</NavLink>
       <NavLink to="/leaderboard">Leaderboard</NavLink>
+      <NavLink to="/admin">Admin</NavLink>
       <div className="spacer" />
       {checking ? null : user ? (
         <>
-          <span className="team-name">👥 {user.username}</span>
+          <span className="team-name">ðŸ‘¥ {user.username}</span>
           <button className="ghost" onClick={logout}>
             Log out
           </button>
@@ -30,7 +31,7 @@ export default function Navbar() {
         </>
       )}
       <button className="ghost" onClick={() => setDark(!dark)} title="Toggle dark mode">
-        {dark ? '☀️' : '🌙'}
+        {dark ? 'â˜€ï¸' : 'ðŸŒ™'}
       </button>
     </nav>
   );
