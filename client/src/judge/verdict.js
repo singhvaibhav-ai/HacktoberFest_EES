@@ -19,3 +19,11 @@ export const VERDICT_LABELS = {
   RE: 'Runtime Error',
   CE: 'Compilation Error',
 };
+
+export const VERDICT_CLASSES = {
+  AC: 'verdict-ac',
+  WA: 'verdict-wa',
+  TLE: 'verdict-tle',
+  RE: 'verdict-re',
+  CE: 'verdict-ce',
+};

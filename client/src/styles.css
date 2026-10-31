@@ -281,7 +281,52 @@ tr.leaderboard-me {
   .spinner {
     animation-duration: 1.6s;
   }
+}
 
-  / slower,
-  not stopped — stopped reads as frozen /
+.verdict-ac,
+.verdict-wa,
+.verdict-tle,
+.verdict-re,
+.verdict-ce {
+  font-weight: 600;
+}
+
+.verdict-ac {
+  color: #1a7f37;
+}
+
+.verdict-wa {
+  color: #cf222e;
+}
+
+.verdict-tle {
+  color: #bc4c00;
+}
+
+.verdict-re {
+  color: #8250df;
+}
+
+.verdict-ce {
+  color: #57606a;
+}
+
+.dark .verdict-ac {
+  color: #3fb950;
+}
+
+.dark .verdict-wa {
+  color: #f85149;
+}
+
+.dark .verdict-tle {
+  color: #f0883e;
+}
+
+.dark .verdict-re {
+  color: #ab7df8;
+}
+
+.dark .verdict-ce {
+  color: #9a9aab;
 }
